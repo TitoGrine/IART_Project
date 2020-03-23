@@ -6,10 +6,9 @@ from graph.node import Node
 class Graph:
 
     # Constructor
-    def __init__(self, validation_function, adding_edges, limit=15, heuristics=False):
+    def __init__(self, validation_function, adding_edges, limit=15):
 
         # default dictionary to store graph
-        self.heuristics = heuristics
         self.limit = limit
         self.graph = defaultdict(list)
         self.adding_edges = adding_edges
@@ -17,7 +16,7 @@ class Graph:
 
     # function to add an edge to graph
     def add_edge(self, u, v):
-        self.graph[u].append(Node(v, parent=u, heuristics=self.heuristics))
+        self.graph[u].append(Node(v, parent=u, heuristics=False))
 
     def __run_graph(self, s, function):
 
@@ -25,7 +24,7 @@ class Graph:
         visited = defaultdict(bool)
 
         # Create a queue for BFS
-        queue = [Node(s, heuristics=self.heuristics)]
+        queue = [Node(s, heuristics=False)]
 
         # Mark the source node as
         # visited and enqueue it
@@ -55,7 +54,7 @@ class Graph:
 
         # Create a queue for BFS
         queue = PriorityQueue()
-        queue.put(s)
+        queue.put(Node(s))
 
         # Mark the source node as
         # visited and enqueue it
@@ -67,11 +66,11 @@ class Graph:
 
             s = queue.get()
             print(s, end=" ")
-            for i in self.graph[s]:
+            for i in self.adding_edges(s):
                 if self.validation_function(s):
                     return s
                 else:
-                    function(i, queue)
+                    function(i, s, queue)
             n += 1
 
     @staticmethod
@@ -93,8 +92,12 @@ class Graph:
         return True
 
     @staticmethod
-    def __add_to_queue(i, queue):
-        queue.put(queue, i)
+    def __dijkstra(v, u, queue):
+        queue.put(Node(v, parent=u, heuristics=False))
+
+    @staticmethod
+    def __a_star(v, u, queue):
+        queue.put(Node(v, parent=u, heuristics=True))
 
     def bfs(self, s):
         return self.__run_graph(s, self.__bfs)
@@ -105,5 +108,8 @@ class Graph:
     def iterative_dfs(self, s):
         return self.__run_graph(s, self.__iterative)
 
-    def shortest_path(self, s):
-        return self.__shortest_path(s, self.__add_to_queue)
+    def dijkstra(self, s):
+        return self.__shortest_path(s, self.__dijkstra)
+
+    def a_star(self, s):
+        return self.__shortest_path(s, self.__a_star)

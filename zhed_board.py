@@ -50,20 +50,20 @@ class ZhedBoard:
     # Builds the board state if the left operator is chosen on a given numbered blocks coordinate
     def left(self, numbered_block):
         y = numbered_block[0]
-        x = numbered_block[1] - 1
+        x = numbered_block[1]
         board_state = deepcopy(self.board_state)
-        num_blocks = board_state[y][x + 1]
+        num_blocks = board_state[y][x]
         row = board_state[y]
         goal = self.is_goal
+        row[x] = BoardState.FILLED
         while num_blocks > 0 and x >= 0:
+            x -= 1
             if row[x] == BoardState.GOAL:
                 goal = True
                 break
-            if row[x] != BoardState.EMPTY:
-                row[x] = BoardState.EMPTY
+            if row[x] == BoardState.EMPTY:
+                row[x] = BoardState.FILLED
                 num_blocks -= 1
-            x -= 1
-
         numbered = self.numbered.copy()
         numbered.remove(numbered_block)
         return ZhedBoard(board_state, self.goals.copy(), numbered, is_goal=goal)
@@ -71,19 +71,20 @@ class ZhedBoard:
     # Builds the board state if the right operator is chosen on a given numbered blocks coordinate
     def right(self, numbered_block):
         y = numbered_block[0]
-        x = numbered_block[1] + 1
+        x = numbered_block[1]
         board_state = deepcopy(self.board_state)
-        num_blocks = board_state[y][x - 1]
+        num_blocks = board_state[y][x]
         row = board_state[y]
         goal = self.is_goal
+        row[x] = BoardState.FILLED
         while num_blocks > 0 and x <= len(row):
+            x += 1
             if row[x] == BoardState.GOAL:
                 goal = True
                 break
-            if row[x] != BoardState.EMPTY:
-                row[x] = BoardState.EMPTY
+            if row[x] == BoardState.EMPTY:
+                row[x] = BoardState.FILLED
                 num_blocks -= 1
-            x += 1
 
         numbered = self.numbered.copy()
         numbered.remove(numbered_block)
@@ -91,19 +92,20 @@ class ZhedBoard:
 
     # Builds the board state if the up operator is chosen on a given numbered blocks coordinate
     def up(self, numbered_block):
-        y = numbered_block[0] - 1
+        y = numbered_block[0]
         x = numbered_block[1]
-        board_state = self.board_state.copy()
-        num_blocks = board_state[y + 1][x]
+        board_state = deepcopy(self.board_state)
+        num_blocks = board_state[y][x]
         goal = self.is_goal
+        board_state[y][x] = BoardState.FILLED
         while num_blocks > 0 and y >= 0:
+            y -= 1
             if board_state[y][x] == BoardState.GOAL:
                 goal = True
                 break
-            if board_state[y][x] != BoardState.EMPTY:
-                board_state[y][x] = BoardState.EMPTY
+            if board_state[y][x] == BoardState.EMPTY:
+                board_state[y][x] = BoardState.FILLED
                 num_blocks -= 1
-            y -= 1
 
         numbered = self.numbered.copy()
         numbered.remove(numbered_block)
@@ -111,19 +113,20 @@ class ZhedBoard:
 
     # Builds the board state if the down operator is chosen on a given numbered blocks coordinate
     def down(self, numbered_block):
-        y = numbered_block[0] + 1
+        y = numbered_block[0]
         x = numbered_block[1]
-        board_state = self.board_state.copy()
-        num_blocks = board_state[y - 1][x]
+        board_state = deepcopy(self.board_state)
+        num_blocks = board_state[y][x]
         goal = self.is_goal
+        board_state[y][x] = BoardState.FILLED
         while num_blocks > 0 and y <= len(board_state):
+            y += 1
             if board_state[y][x] == BoardState.GOAL:
                 goal = True
                 break
-            if board_state[y][x] != BoardState.EMPTY:
-                board_state[y][x] = BoardState.EMPTY
+            if board_state[y][x] == BoardState.EMPTY:
+                board_state[y][x] = BoardState.FILLED
                 num_blocks -= 1
-            y += 1
 
         numbered = self.numbered.copy()
         numbered.remove(numbered_block)
