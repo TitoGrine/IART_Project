@@ -1,11 +1,12 @@
 from collections import defaultdict
 from queue import PriorityQueue
+from graph.node import Node
 
 
 class Graph:
 
     # Constructor
-    def __init__(self, validation_function, adding_edges, limit):
+    def __init__(self, validation_function, adding_edges, limit=15):
 
         # default dictionary to store graph
         self.limit = limit
@@ -15,7 +16,7 @@ class Graph:
 
     # function to add an edge to graph
     def add_edge(self, u, v):
-        self.graph[u].append(v)
+        self.graph[u].append(Node(v, parent=u, heuristics=False))
 
     def __run_graph(self, s, function):
 
@@ -23,14 +24,13 @@ class Graph:
         visited = defaultdict(bool)
 
         # Create a queue for BFS
-        queue = [s]
+        queue = [Node(s, heuristics=False)]
 
         # Mark the source node as
         # visited and enqueue it
         visited[s] = True
-        finished = True
         n = 0
-        while finished:
+        while True:
 
             # Dequeue a vertex from
             # queue and print it
@@ -39,13 +39,13 @@ class Graph:
             print(s, end=" ")
             for i in self.adding_edges(s):
                 self.add_edge(s, i)
-                # Get all adjacent vertices of the
-                # dequeued vertex s. If a adjacent
-                # has not been visited, then mark it
-                # visited and enqueue it
+            # Get all adjacent vertices of the
+            # dequeued vertex s. If a adjacent
+            # has not been visited, then mark it
+            # visited and enqueue it
             for i in self.graph[s]:
                 if self.validation_function(s):
-                    finished = False
+                    return s
                 elif not visited[i]:
                     function(i, queue, visited, n)
             n += 1
@@ -54,24 +54,23 @@ class Graph:
 
         # Create a queue for BFS
         queue = PriorityQueue()
-        queue.put(s)
+        queue.put(Node(s))
 
         # Mark the source node as
         # visited and enqueue it
-        finished = True
         n = 0
-        while finished:
+        while True:
 
             # Dequeue a vertex from
             # queue and print it
 
             s = queue.get()
             print(s, end=" ")
-            for i in self.graph[s]:
+            for i in self.adding_edges(s):
                 if self.validation_function(s):
-                    finished = False
+                    return s
                 else:
-                    function(i, queue)
+                    function(i, s, queue)
             n += 1
 
     @staticmethod
@@ -93,17 +92,24 @@ class Graph:
         return True
 
     @staticmethod
-    def __add_to_queue(i, queue):
-        queue.put(queue, i)
+    def __dijkstra(v, u, queue):
+        queue.put(Node(v, parent=u, heuristics=False))
+
+    @staticmethod
+    def __a_star(v, u, queue):
+        queue.put(Node(v, parent=u, heuristics=True))
 
     def bfs(self, s):
-        self.__run_graph(s, self.__bfs)
+        return self.__run_graph(s, self.__bfs)
 
     def dfs(self, s):
-        self.__run_graph(s, self.__dfs)
+        return self.__run_graph(s, self.__dfs)
 
     def iterative_dfs(self, s):
-        self.__run_graph(s, self.__iterative)
+        return self.__run_graph(s, self.__iterative)
 
-    def shortest_path(self, s):
-        self.__shortest_path(s, self.__add_to_queue)
+    def dijkstra(self, s):
+        return self.__shortest_path(s, self.__dijkstra)
+
+    def a_star(self, s):
+        return self.__shortest_path(s, self.__a_star)
