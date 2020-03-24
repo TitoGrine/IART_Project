@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from enum import Enum
 import sys
 from copy import deepcopy
@@ -7,6 +8,20 @@ class BoardState(Enum):
     GOAL = -2
     EMPTY = -1
     FILLED = 0
+
+
+class BoardMove(Enum):
+    RIGHT = 0
+    LEFT = 1
+    UP = 2
+    DOWN = 3
+
+
+@dataclass
+class Move:
+    move: BoardMove
+    starting_block: tuple
+    num_blocks: int
 
 
 # Class to save state of Zhed Board
@@ -21,11 +36,12 @@ class ZhedBoard:
         "X": BoardState.GOAL
     }
 
-    def __init__(self, board_state, goals, numbered, is_goal=False):
+    def __init__(self, board_state, goals, numbered, is_goal=False, move=None):
         self.is_goal = is_goal
         self.numbered = numbered
         self.goals = goals
         self.board_state = board_state
+        self.move = move
 
     # Build from list of list of strings the state of the board
     @staticmethod
@@ -47,16 +63,21 @@ class ZhedBoard:
             board.append(row)
         return ZhedBoard(board, goals, numbered)
 
-    # Builds the board state if the left operator is chosen on a given numbered blocks coordinate
-    def left(self, numbered_block):
+    @staticmethod
+    def get_coordinates(numbered_block):
         y = numbered_block[0]
         x = numbered_block[1]
+        return x, y
+
+    # Builds the board state if the left operator is chosen on a given numbered blocks coordinate
+    def left(self, numbered_block):
+        x, y = self.get_coordinates(numbered_block)
         board_state = deepcopy(self.board_state)
         num_blocks = board_state[y][x]
         row = board_state[y]
         goal = self.is_goal
         row[x] = BoardState.FILLED
-        while num_blocks > 0 and x >= 0:
+        while num_blocks > 0 and x > 0:
             x -= 1
             if row[x] == BoardState.GOAL:
                 goal = True
@@ -66,18 +87,18 @@ class ZhedBoard:
                 num_blocks -= 1
         numbered = self.numbered.copy()
         numbered.remove(numbered_block)
-        return ZhedBoard(board_state, self.goals.copy(), numbered, is_goal=goal)
+        return ZhedBoard(board_state, self.goals.copy(), numbered, is_goal=goal,
+                         move=Move(BoardMove.LEFT, numbered_block, num_blocks))
 
     # Builds the board state if the right operator is chosen on a given numbered blocks coordinate
     def right(self, numbered_block):
-        y = numbered_block[0]
-        x = numbered_block[1]
+        x, y = self.get_coordinates(numbered_block)
         board_state = deepcopy(self.board_state)
         num_blocks = board_state[y][x]
         row = board_state[y]
         goal = self.is_goal
         row[x] = BoardState.FILLED
-        while num_blocks > 0 and x <= len(row):
+        while num_blocks > 0 and x < len(row) - 1:
             x += 1
             if row[x] == BoardState.GOAL:
                 goal = True
@@ -88,17 +109,17 @@ class ZhedBoard:
 
         numbered = self.numbered.copy()
         numbered.remove(numbered_block)
-        return ZhedBoard(board_state, self.goals.copy(), numbered, is_goal=goal)
+        return ZhedBoard(board_state, self.goals.copy(), numbered, is_goal=goal,
+                         move=Move(BoardMove.RIGHT, numbered_block, num_blocks))
 
     # Builds the board state if the up operator is chosen on a given numbered blocks coordinate
     def up(self, numbered_block):
-        y = numbered_block[0]
-        x = numbered_block[1]
+        x, y = self.get_coordinates(numbered_block)
         board_state = deepcopy(self.board_state)
         num_blocks = board_state[y][x]
         goal = self.is_goal
         board_state[y][x] = BoardState.FILLED
-        while num_blocks > 0 and y >= 0:
+        while num_blocks > 0 and y > 0:
             y -= 1
             if board_state[y][x] == BoardState.GOAL:
                 goal = True
@@ -109,17 +130,17 @@ class ZhedBoard:
 
         numbered = self.numbered.copy()
         numbered.remove(numbered_block)
-        return ZhedBoard(board_state, self.goals.copy(), numbered, is_goal=goal)
+        return ZhedBoard(board_state, self.goals.copy(), numbered, is_goal=goal,
+                         move=Move(BoardMove.UP, numbered_block, num_blocks))
 
     # Builds the board state if the down operator is chosen on a given numbered blocks coordinate
     def down(self, numbered_block):
-        y = numbered_block[0]
-        x = numbered_block[1]
+        x, y = self.get_coordinates(numbered_block)
         board_state = deepcopy(self.board_state)
         num_blocks = board_state[y][x]
         goal = self.is_goal
         board_state[y][x] = BoardState.FILLED
-        while num_blocks > 0 and y <= len(board_state):
+        while num_blocks > 0 and y < len(board_state) - 1:
             y += 1
             if board_state[y][x] == BoardState.GOAL:
                 goal = True
@@ -130,7 +151,8 @@ class ZhedBoard:
 
         numbered = self.numbered.copy()
         numbered.remove(numbered_block)
-        return ZhedBoard(board_state, self.goals.copy(), numbered, is_goal=goal)
+        return ZhedBoard(board_state, self.goals.copy(), numbered, is_goal=goal,
+                         move=Move(BoardMove.DOWN, numbered_block, num_blocks))
 
     # Gets all the operators from the current board state
     @staticmethod

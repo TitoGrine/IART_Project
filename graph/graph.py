@@ -34,9 +34,11 @@ class Graph:
 
             # Dequeue a vertex from
             # queue and print it
+            if len(queue) == 0:
+                print("Didn't find a solution! Stopping...")
+                break
 
             s = queue.pop(0)
-            print(s, end=" ")
             for i in self.adding_edges(s):
                 self.add_edge(s, i)
             # Get all adjacent vertices of the
@@ -44,7 +46,7 @@ class Graph:
             # has not been visited, then mark it
             # visited and enqueue it
             for i in self.graph[s]:
-                if self.validation_function(s):
+                if self.validation_function(i.state):
                     return s
                 elif not visited[i]:
                     function(i, queue, visited, n)
@@ -63,12 +65,14 @@ class Graph:
 
             # Dequeue a vertex from
             # queue and print it
+            if len(queue.queue) == 0:
+                print("\nDidn't find a solution! Stopping...")
+                break
 
             s = queue.get()
-            print(s, end=" ")
             for i in self.adding_edges(s):
-                if self.validation_function(s):
-                    return s
+                if self.validation_function(i):
+                    return Node(i, parent=s)
                 else:
                     function(i, s, queue)
             n += 1
