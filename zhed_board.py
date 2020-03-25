@@ -192,13 +192,13 @@ class ZhedBoard:
         if x == nearest_goal[1] or y == nearest_goal[0]:
             value += 10  #value subject to change
         #if expanding away from goal, lessen priority
-        if self.move.move = BoardMove.LEFT and x < nearest_goal[1]:
+        if self.move.move == BoardMove.LEFT and x < nearest_goal[1]:
             value += 1
-        if self.move.move = BoardMove.RIGHT and x > nearest_goal[1]:
+        if self.move.move == BoardMove.RIGHT and x > nearest_goal[1]:
             value += 1
-        if self.move.move = BoardMove.DOWN and y > nearest_goal[0]:
+        if self.move.move == BoardMove.DOWN and y > nearest_goal[0]:
             value += 1
-        if self.move.move = BoardMove.UP and y < nearest_goal[0]:
+        if self.move.move == BoardMove.UP and y < nearest_goal[0]:
             value += 1
         value += nearest_dist
 
