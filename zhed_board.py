@@ -179,8 +179,30 @@ class ZhedBoard:
         return operators
 
     def heuristics(self):
-        # TODO: Add heuristic to compare states
-        return 0
+        value = 0
+        nearest_goal = self.goals[0]
+        x, y = get_coordinates(self.move.starting_block)
+        nearest_dist = abs(x - nearest_goal[1]) + abs( y - nearest_goal[0])
+        #find nearest goal
+        for i in self.goals:
+            if abs(x - i[1]) + abs( y - i[0]) < nearest_dist:
+                nearest_goal = i
+                nearest_dist = abs(x - i[1]) + abs( y - i[0])
+        #if in same row or column as goal, lessen priority
+        if x == nearest_goal[1] or y == nearest_goal[0]:
+            value += 10  #value subject to change
+        #if expanding away from goal, lessen priority
+        if self.move.move = BoardMove.LEFT and x < nearest_goal[1]:
+            value += 1
+        if self.move.move = BoardMove.RIGHT and x > nearest_goal[1]:
+            value += 1
+        if self.move.move = BoardMove.DOWN and y > nearest_goal[0]:
+            value += 1
+        if self.move.move = BoardMove.UP and y < nearest_goal[0]:
+            value += 1
+        value += nearest_dist
+
+        return value
 
     def cost(self):
         cost = 0
@@ -189,10 +211,10 @@ class ZhedBoard:
             y = block[0]
             for i in self.numbered:
                 if i[0] == y:
-                    if |i[1] - x| <= self.board_state[i[0]][i[1]]:
+                    if abs(i[1] - x) <= self.board_state[i[0]][i[1]]:
                         cost -= 1
                 if i[1] == x:
-                    if |i[0] - y| <= self.board_state[i[0]][i[1]]:
+                    if abs(i[0] - y) <= self.board_state[i[0]][i[1]]:
                         cost -= 1
 
         return cost
