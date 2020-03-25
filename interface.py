@@ -1,48 +1,66 @@
 import pygame
 import zhed_board
+from run import run_puzzle
 import math
 import puzzle_reader
+import random
 
-pygame.init()
+size = 80
 
-pygame.display.set_caption("Zhed")
+def bot_playing(puzzle):
+    pygame.init()
+    pygame.display.set_caption("Zhed")
 
-level = puzzle_reader.get_puzzle(99)
+    font = pygame.font.SysFont('Arial', 35, 1, 0)
+    level = puzzle_reader.get_puzzle(puzzle)
+    boards = run_puzzle(level)
 
-board = zhed_board.ZhedBoard.build_from_file(level).board_state
+    side = len(level)
+    window = pygame.display.set_mode((side * size, side * size))
 
-side = len(level)
+    run = True
 
-window = pygame.display.set_mode((side * 50, side * 50))
+    index = 0
 
-width = 50
-heigth = 50
+    while run:
+        pygame.time.delay(70)
 
-run = True
-while run:
-    pygame.time.delay(100)
+        board = boards[index]
+
+        for i in range(side):
+            y_pos = i * size
+            for j in range(side):
+                x_pos = j * size
+                tile = board[i][j]
+                deviance = random.randint(170, 190)      
+
+                if tile == zhed_board.BoardState.GOAL:
+                    text = font.render('⊛', True, (0, 0, 0))
+                    pygame.draw.rect(window, (255, 102,   0), (x_pos, y_pos, size, size))
+                    window.blit(text, (x_pos + round((size - text.get_width())/2), y_pos + round((size - text.get_height())/2)))
+                elif tile == zhed_board.BoardState.EMPTY:
+                    pygame.draw.rect(window, (deviance, deviance, deviance), (x_pos, y_pos, size, size))
+                elif tile == zhed_board.BoardState.FILLED:
+                    text = font.render('·', True, (205, 174,   0))
+                    pygame.draw.rect(window, (255, 204,   0), (x_pos, y_pos, size, size))
+                    window.blit(text, (x_pos + round((size - text.get_width())/2), y_pos + round((size - text.get_height())/2)))
+                else:
+                    text = font.render(str(tile), True, (0, 0, 0))
+                    pygame.draw.rect(window, (255, 255, 255), (x_pos, y_pos, size, size))
+                    window.blit(text, (x_pos + round((size - text.get_width())/2), y_pos + round((size - text.get_height())/2)))
+            
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RIGHT and index != len(boards) - 1:
+                    index += 1
+                elif event.key == pygame.K_LEFT and index != 0:
+                    index -= 1
+
+        pygame.display.update()
+
+    pygame.quit()
 
 
-    for i in range(side):
-        y_pos = i * 50
-
-        for j in range(side):
-            x_pos = j * 50
-            tile = board[i][j]
-
-            if   (tile == zhed_board.BoardState.GOAL):
-                pygame.draw.rect(window, (255, 102,   0), (x_pos, y_pos, width, heigth))
-            elif (tile == zhed_board.BoardState.EMPTY):
-                pygame.draw.rect(window, (192, 192, 192), (x_pos, y_pos, width, heigth))
-            elif (tile == zhed_board.BoardState.FILLED):
-                pygame.draw.rect(window, (255, 204,   0), (x_pos, y_pos, width, heigth))
-            else:
-                pygame.draw.rect(window, (255, 255, 255), (x_pos, y_pos, width, heigth))
-        
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            run = False
-
-    pygame.display.update()
-
-pygame.quit()
+bot_playing(4)
