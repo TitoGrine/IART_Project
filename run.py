@@ -11,8 +11,9 @@ graph = Graph(lambda node: node.is_goal, lambda node: ZhedBoard.get_all_operator
 node = graph.a_star(game_board)
 end_timestamp = datetime.now()
 print(node)
-elapsed_time = end_timestamp-start_timestamp
+elapsed_time = end_timestamp - start_timestamp
 print("Elapsed Time: " + str(elapsed_time) + "ms")
+
 
 def get_boards_list(main_node):
     boards = []
@@ -27,7 +28,7 @@ def get_boards_list(main_node):
 
     boards.reverse()
 
-    return boards 
+    return boards
 
 
 def run_puzzle(puzzle):
