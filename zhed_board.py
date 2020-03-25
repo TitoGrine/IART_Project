@@ -22,7 +22,7 @@ class Move:
     move: BoardMove
     starting_block: tuple
     num_blocks: int
-    placed_blocks: list = []
+    placed_blocks: list
 
 
 # Class to save state of Zhed Board
@@ -181,7 +181,7 @@ class ZhedBoard:
     def heuristics(self):
         value = 0
         nearest_goal = self.goals[0]
-        x, y = get_coordinates(self.move.starting_block)
+        x, y = self.get_coordinates(self.move.starting_block)
         nearest_dist = abs(x - nearest_goal[1]) + abs( y - nearest_goal[0])
         #find nearest goal
         for i in self.goals:
