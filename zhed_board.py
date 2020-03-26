@@ -195,7 +195,76 @@ class ZhedBoard:
         # if in same row or column as goal, lessen priority
         if x == nearest_goal[1] or y == nearest_goal[0]:
             value += 9  # value subject to change
+        
+        edge_expand = True
+        side_lt = False
+        side_gt = False
+        if self.move.move == BoardMove.LEFT:
+            if nearest_goal[1] < x:
+                edge_expand = False
+            else:
+                for i in self.numbered:
+                    if i[1] < x:
+                        edge_expand = False
+                        if i[0] == y:
+                            break
+                        if i[0] < y:
+                            side_lt = True
+                        else:
+                            side_gt = True
+                        if side_lt and side_gt:
+                            break
+        elif self.move.move == BoardMove.RIGHT:
+            if nearest_goal[1] > x:
+                edge_expand = False
+            else:
+                for i in self.numbered:
+                    if i[1] > x:
+                        edge_expand = False
+                        if i[0] == y:
+                            break
+                        if i[0] < y:
+                            side_lt = True
+                        else:
+                            side_gt = True
+                        if side_lt and side_gt:
+                            break
+        elif self.move.move == BoardMove.DOWN:
+            if nearest_goal[0] > y:
+                edge_expand = False
+            else:
+                for i in self.numbered:
+                    if i[0] > y:
+                        edge_expand = False
+                        if i[1] == x:
+                            break
+                        if i[1] < x:
+                            side_lt = True
+                        else:
+                            side_gt = True
+                        if side_lt and side_gt:
+                            break
+        elif self.move.move == BoardMove.UP:
+            if nearest_goal[0] < y:
+                edge_expand = False
+            else:
+                for i in self.numbered:
+                    if i[0] < y:
+                        edge_expand = False
+                        if i[1] == x:
+                            break
+                        if i[1] < x:
+                            side_lt = True
+                        else:
+                            side_gt = True
+                        if side_lt and side_gt:
+                            break
+        if edge_expand or not (side_lt and side_gt):
+            return 1000
+
+        
         # if expanding away from goal, lessen priority
+        
         if self.move.move == BoardMove.LEFT and x < nearest_goal[1]:
             value += 7
         elif self.move.move == BoardMove.RIGHT and x > nearest_goal[1]:
@@ -204,7 +273,8 @@ class ZhedBoard:
             value += 7
         elif self.move.move == BoardMove.UP and y < nearest_goal[0]:
             value += 7
-        return value + self.manhattan(nearest_goal, self.move.starting_block)
+        
+        return value + self.manhattan(nearest_goal, self.move.finish_block)
 
     def get_nearest_goal(self):
         return reduce(
@@ -228,10 +298,14 @@ class ZhedBoard:
             x = block[1]
             y = block[0]
             for i in self.numbered:
+                
                 if i[0] == y:
+                    
                     if abs(i[1] - x) <= self.board_state[i[0]][i[1]]:
                         cost -= 10
                 if i[1] == x:
+                    
+                    
                     if abs(i[0] - y) <= self.board_state[i[0]][i[1]]:
                         cost -= 10
         return cost
