@@ -70,6 +70,8 @@ class Graph:
                 break
 
             s = queue.get()
+            # if s.state.move is not None:
+            #     print("expanded " + str(s.state.move.starting_block) + str(s.state.move.move))
             for i in self.adding_edges(s):
                 if self.validation_function(i):
                     return Node(i, parent=s)

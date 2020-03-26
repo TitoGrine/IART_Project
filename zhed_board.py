@@ -87,7 +87,7 @@ class ZhedBoard:
                 break
             if row[x] == BoardState.EMPTY:
                 row[x] = BoardState.FILLED
-                placed_blocks.append((y,x))
+                placed_blocks.append((y, x))
                 num_blocks -= 1
         numbered = self.numbered.copy()
         numbered.remove(numbered_block)
@@ -110,7 +110,7 @@ class ZhedBoard:
                 break
             if row[x] == BoardState.EMPTY:
                 row[x] = BoardState.FILLED
-                placed_blocks.append((y,x))
+                placed_blocks.append((y, x))
                 num_blocks -= 1
 
         numbered = self.numbered.copy()
@@ -133,7 +133,7 @@ class ZhedBoard:
                 break
             if board_state[y][x] == BoardState.EMPTY:
                 board_state[y][x] = BoardState.FILLED
-                placed_blocks.append((y,x))
+                placed_blocks.append((y, x))
                 num_blocks -= 1
 
         numbered = self.numbered.copy()
@@ -156,7 +156,7 @@ class ZhedBoard:
                 break
             if board_state[y][x] == BoardState.EMPTY:
                 board_state[y][x] = BoardState.FILLED
-                placed_blocks.append((y,x))
+                placed_blocks.append((y, x))
                 num_blocks -= 1
 
         numbered = self.numbered.copy()
@@ -183,36 +183,32 @@ class ZhedBoard:
     def manhattan(self, other):
         return abs(self[0] - other[0]) + abs(self[1] - other[1])
 
-
     def heuristics(self):
         value = 0
         x, y = self.get_coordinates(self.move.starting_block)
-        coordinates = (y,x)
-        #find nearest goal
+        # find nearest goal
+        coordinates = (y, x)
         nearest_goal = reduce(
-            lambda curr, nxt: curr if self.manhattan(curr, coordinates) < self.manhattan(nxt, coordinates) else nxt, 
+            lambda curr, nxt: curr if self.manhattan(curr, coordinates) < self.manhattan(nxt, coordinates) else nxt,
             self.goals)
-        #if in same row or column as goal, lessen priority
+        # if in same row or column as goal, lessen priority
         if x == nearest_goal[1] or y == nearest_goal[0]:
-            value += 10  #value subject to change
-        #if expanding away from goal, lessen priority
+            value += 9  # value subject to change
+        # if expanding away from goal, lessen priority
         if self.move.move == BoardMove.LEFT and x < nearest_goal[1]:
-            value += 1
-        if self.move.move == BoardMove.RIGHT and x > nearest_goal[1]:
-            value += 1
-        if self.move.move == BoardMove.DOWN and y > nearest_goal[0]:
-            value += 1
-        if self.move.move == BoardMove.UP and y < nearest_goal[0]:
-            value += 1
-            
-        value += self.manhattan(nearest_goal, coordinates)
-
-        return value
+            value += 7
+        elif self.move.move == BoardMove.RIGHT and x > nearest_goal[1]:
+            value += 7
+        elif self.move.move == BoardMove.DOWN and y > nearest_goal[0]:
+            value += 7
+        elif self.move.move == BoardMove.UP and y < nearest_goal[0]:
+            value += 7
+        return value + self.manhattan(nearest_goal, coordinates)
 
     def cost(self):
         if self.is_goal:
             return -sys.maxsize
-        
+
         cost = 0
         for block in self.move.placed_blocks:
             x = block[1]
@@ -220,9 +216,8 @@ class ZhedBoard:
             for i in self.numbered:
                 if i[0] == y:
                     if abs(i[1] - x) <= self.board_state[i[0]][i[1]]:
-                        cost -= 1
+                        cost -= 10
                 if i[1] == x:
                     if abs(i[0] - y) <= self.board_state[i[0]][i[1]]:
-                        cost -= 1
-
+                        cost -= 10
         return cost
