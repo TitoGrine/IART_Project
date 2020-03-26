@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from enum import Enum
 import sys
 from copy import deepcopy
+from functools import reduce
 
 
 class BoardState(Enum):
@@ -178,16 +179,19 @@ class ZhedBoard:
                 operators.append(self.up(i))
         return operators
 
+    @staticmethod
+    def manhattan(self, other):
+        return abs(self[0] - other[0]) + abs(self[1] - other[1])
+
+
     def heuristics(self):
         value = 0
-        nearest_goal = self.goals[0]
         x, y = self.get_coordinates(self.move.starting_block)
-        nearest_dist = abs(x - nearest_goal[1]) + abs( y - nearest_goal[0])
+        coordinates = (y,x)
         #find nearest goal
-        for i in self.goals:
-            if abs(x - i[1]) + abs( y - i[0]) < nearest_dist:
-                nearest_goal = i
-                nearest_dist = abs(x - i[1]) + abs( y - i[0])
+        nearest_goal = reduce(
+            lambda curr, nxt: curr if self.manhattan(curr, coordinates) < self.manhattan(nxt, coordinates) else nxt, 
+            self.goals)
         #if in same row or column as goal, lessen priority
         if x == nearest_goal[1] or y == nearest_goal[0]:
             value += 10  #value subject to change
@@ -200,11 +204,15 @@ class ZhedBoard:
             value += 1
         if self.move.move == BoardMove.UP and y < nearest_goal[0]:
             value += 1
-        value += nearest_dist
+            
+        value += self.manhattan(nearest_goal, coordinates)
 
         return value
 
     def cost(self):
+        if self.is_goal:
+            return -sys.maxsize
+        
         cost = 0
         for block in self.move.placed_blocks:
             x = block[1]
