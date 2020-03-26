@@ -25,6 +25,7 @@ class Move:
     starting_block: tuple
     finish_block: tuple
     placed_blocks: list
+    skipped_blocks: int
 
 
 # Class to save state of Zhed Board
@@ -39,7 +40,8 @@ class ZhedBoard:
         "X": BoardState.GOAL
     }
 
-    def __init__(self, board_state, goals, numbered, is_goal=False, move=None):
+    def __init__(self, board_state, goals, numbered, align_numbered, is_goal=False, move=None):
+        self.align_numbered = align_numbered
         self.is_goal = is_goal
         self.numbered = numbered
         self.goals = goals
@@ -67,7 +69,11 @@ class ZhedBoard:
                     numbered.append((i, j))
                 row.append(piece)
             board.append(row)
-        return ZhedBoard(board, goals, numbered)
+
+        aligned_numbered = list(filter(
+            lambda x: len(list(filter(lambda y: y[0] == x[0] or x[1] == y[1], goals))) > 0, numbered))
+
+        return ZhedBoard(board, goals, numbered, aligned_numbered)
 
     @staticmethod
     def get_coordinates(numbered_block):
@@ -95,8 +101,9 @@ class ZhedBoard:
                 num_blocks -= 1
         numbered = self.numbered.copy()
         numbered.remove(numbered_block)
-        return ZhedBoard(board_state, self.goals.copy(), numbered, is_goal=goal,
-                         move=Move(BoardMove.LEFT, numbered_block, (y, x), placed_blocks))
+        skipped_blocks = abs(x - numbered_block[1]) - self.board_state[numbered_block[0]][numbered_block[1]]
+        return ZhedBoard(board_state, self.goals.copy(), numbered, self.align_numbered, is_goal=goal,
+                         move=Move(BoardMove.LEFT, numbered_block, (y, x), placed_blocks, skipped_blocks))
 
     # Builds the board state if the right operator is chosen on a given numbered blocks coordinate
     def right(self, numbered_block):
@@ -119,8 +126,9 @@ class ZhedBoard:
 
         numbered = self.numbered.copy()
         numbered.remove(numbered_block)
-        return ZhedBoard(board_state, self.goals.copy(), numbered, is_goal=goal,
-                         move=Move(BoardMove.RIGHT, numbered_block, (y, x), placed_blocks))
+        skipped_blocks = abs(x - numbered_block[1]) - self.board_state[numbered_block[0]][numbered_block[1]]
+        return ZhedBoard(board_state, self.goals.copy(), numbered, self.align_numbered, is_goal=goal,
+                         move=Move(BoardMove.RIGHT, numbered_block, (y, x), placed_blocks, skipped_blocks))
 
     # Builds the board state if the up operator is chosen on a given numbered blocks coordinate
     def up(self, numbered_block):
@@ -142,8 +150,9 @@ class ZhedBoard:
 
         numbered = self.numbered.copy()
         numbered.remove(numbered_block)
-        return ZhedBoard(board_state, self.goals.copy(), numbered, is_goal=goal,
-                         move=Move(BoardMove.UP, numbered_block, (y, x), placed_blocks))
+        skipped_blocks = abs(y - numbered_block[0]) - self.board_state[numbered_block[0]][numbered_block[1]]
+        return ZhedBoard(board_state, self.goals.copy(), numbered, self.align_numbered, is_goal=goal,
+                         move=Move(BoardMove.UP, numbered_block, (y, x), placed_blocks, skipped_blocks))
 
     # Builds the board state if the down operator is chosen on a given numbered blocks coordinate
     def down(self, numbered_block):
@@ -165,8 +174,9 @@ class ZhedBoard:
 
         numbered = self.numbered.copy()
         numbered.remove(numbered_block)
-        return ZhedBoard(board_state, self.goals.copy(), numbered, is_goal=goal,
-                         move=Move(BoardMove.DOWN, numbered_block, (y, x), placed_blocks))
+        skipped_blocks = abs(y - numbered_block[0]) - self.board_state[numbered_block[0]][numbered_block[1]]
+        return ZhedBoard(board_state, self.goals.copy(), numbered, self.align_numbered, is_goal=goal,
+                         move=Move(BoardMove.DOWN, numbered_block, (y, x), placed_blocks, skipped_blocks))
 
     # Gets all the operators from the current board state
     @staticmethod
@@ -191,98 +201,76 @@ class ZhedBoard:
         value = 0
         x, y = self.get_coordinates(self.move.starting_block)
         # find nearest goal
-        nearest_goal = self.get_nearest_goal()
-        # if in same row or column as goal, lessen priority
-        if x == nearest_goal[1] or y == nearest_goal[0]:
-            value += 9  # value subject to change
-        
-        edge_expand = True
-        side_lt = False
-        side_gt = False
-        if self.move.move == BoardMove.LEFT:
-            if nearest_goal[1] < x:
-                edge_expand = False
-            else:
-                for i in self.numbered:
-                    if i[1] < x:
-                        edge_expand = False
-                        if i[0] == y:
-                            break
-                        if i[0] < y:
-                            side_lt = True
-                        else:
-                            side_gt = True
-                        if side_lt and side_gt:
-                            break
-        elif self.move.move == BoardMove.RIGHT:
-            if nearest_goal[1] > x:
-                edge_expand = False
-            else:
-                for i in self.numbered:
-                    if i[1] > x:
-                        edge_expand = False
-                        if i[0] == y:
-                            break
-                        if i[0] < y:
-                            side_lt = True
-                        else:
-                            side_gt = True
-                        if side_lt and side_gt:
-                            break
-        elif self.move.move == BoardMove.DOWN:
-            if nearest_goal[0] > y:
-                edge_expand = False
-            else:
-                for i in self.numbered:
-                    if i[0] > y:
-                        edge_expand = False
-                        if i[1] == x:
-                            break
-                        if i[1] < x:
-                            side_lt = True
-                        else:
-                            side_gt = True
-                        if side_lt and side_gt:
-                            break
-        elif self.move.move == BoardMove.UP:
-            if nearest_goal[0] < y:
-                edge_expand = False
-            else:
-                for i in self.numbered:
-                    if i[0] < y:
-                        edge_expand = False
-                        if i[1] == x:
-                            break
-                        if i[1] < x:
-                            side_lt = True
-                        else:
-                            side_gt = True
-                        if side_lt and side_gt:
-                            break
-        if edge_expand or not (side_lt and side_gt):
-            return 1000
+        nearest_goal = self.get_nearest(self.move.starting_block, self.goals)
 
-        
-        # if expanding away from goal, lessen priority
-        
-        if self.move.move == BoardMove.LEFT and x < nearest_goal[1]:
-            value += 7
-        elif self.move.move == BoardMove.RIGHT and x > nearest_goal[1]:
-            value += 7
-        elif self.move.move == BoardMove.DOWN and y > nearest_goal[0]:
-            value += 7
-        elif self.move.move == BoardMove.UP and y < nearest_goal[0]:
-            value += 7
-        
-        return value + self.manhattan(nearest_goal, self.move.finish_block)
+        # edge_expand = True
+        # if self.move.move == BoardMove.LEFT:
+        #     if nearest_goal[1] < x:
+        #         edge_expand = False
+        #     else:
+        #         for i in self.numbered:
+        #             if i[1] < x:
+        #                 edge_expand = False
+        #                 break
+        # elif self.move.move == BoardMove.RIGHT:
+        #     if nearest_goal[1] > x:
+        #         edge_expand = False
+        #     else:
+        #         for i in self.numbered:
+        #             if i[1] > x:
+        #                 edge_expand = False
+        #                 break
+        # elif self.move.move == BoardMove.DOWN:
+        #     if nearest_goal[0] > y:
+        #         edge_expand = False
+        #     else:
+        #         for i in self.numbered:
+        #             if i[0] > y:
+        #                 edge_expand = False
+        #                 break
+        # elif self.move.move == BoardMove.UP:
+        #     if nearest_goal[0] < y:
+        #         edge_expand = False
+        #     else:
+        #         for i in self.numbered:
+        #             if i[0] < y:
+        #                 edge_expand = False
+        #                 break
+        # if edge_expand:
+        #     return 1000
 
-    def get_nearest_goal(self):
+        if len(self.numbered) > 2:
+            # if in same row or column as goal, lessen priority
+            if x == nearest_goal[1] or y == nearest_goal[0]:
+                value += 9  # value subject to change
+
+            # if expanding away from goal, lessen priority
+            if self.move.move == BoardMove.LEFT and x < nearest_goal[1]:
+                value += 7
+            elif self.move.move == BoardMove.RIGHT and x > nearest_goal[1]:
+                value += 7
+            elif self.move.move == BoardMove.DOWN and y > nearest_goal[0]:
+                value += 7
+            elif self.move.move == BoardMove.UP and y < nearest_goal[0]:
+                value += 7
+
+        nearest_dist = self.manhattan(self.move.starting_block,
+                                      self.get_nearest(self.move.starting_block, self.align_numbered)) \
+            if len(self.numbered) > 0 else -self.manhattan(self.move.starting_block,
+                                                           self.get_nearest(self.move.starting_block,
+                                                                            self.align_numbered))
+
+        goal_dist = self.manhattan(nearest_goal, self.move.finish_block) \
+            if len(self.numbered) > 0 else - self.manhattan(nearest_goal, self.move.finish_block)
+        return value + goal_dist + nearest_dist
+
+    def get_nearest(self, coordinates, coordinates_list):
         return reduce(
-            lambda curr, nxt: curr if self.manhattan(curr, self.move.starting_block) <
-                                      self.manhattan(nxt, self.move.starting_block) else nxt, self.goals)
+            lambda curr, nxt: curr if self.manhattan(curr, coordinates) <
+                                      self.manhattan(nxt, coordinates) else nxt, coordinates_list)
 
     def is_the_same_quadrant(self):
-        nearest_goal = self.get_nearest_goal()
+        nearest_goal = self.get_nearest_goal(self.move.starting_block, self.goals)
         x_quadrant = len(self.board_state[0]) / 2
         y_quadrant = len(self.board_state) / 2
         goal_quadrant = (math.ceil(nearest_goal[0] / y_quadrant), math.ceil(nearest_goal[1] / x_quadrant))
@@ -298,14 +286,13 @@ class ZhedBoard:
             x = block[1]
             y = block[0]
             for i in self.numbered:
-                
+
                 if i[0] == y:
-                    
+
                     if abs(i[1] - x) <= self.board_state[i[0]][i[1]]:
                         cost -= 10
                 if i[1] == x:
-                    
-                    
+
                     if abs(i[0] - y) <= self.board_state[i[0]][i[1]]:
                         cost -= 10
         return cost

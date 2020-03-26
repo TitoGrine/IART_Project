@@ -1,9 +1,9 @@
 from zhed_board import ZhedBoard
 from graph.graph import Graph
-from puzzle_reader import get_puzzle
+from puzzle_reader import read_file
 from datetime import datetime
 
-puzzle = get_puzzle(16)
+puzzle = read_file(21)
 game_board = ZhedBoard.build_from_file(puzzle)
 print(game_board)
 start_timestamp = datetime.now()
