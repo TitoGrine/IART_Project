@@ -3,7 +3,7 @@ from graph.graph import Graph
 from puzzle_reader import get_puzzle
 from datetime import datetime
 
-puzzle = get_puzzle(20)
+puzzle = get_puzzle(16)
 game_board = ZhedBoard.build_from_file(puzzle)
 print(game_board)
 start_timestamp = datetime.now()
