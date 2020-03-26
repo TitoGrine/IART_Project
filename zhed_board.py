@@ -44,6 +44,9 @@ class ZhedBoard:
         self.goals = goals
         self.board_state = board_state
         self.move = move
+        if move is not None:
+            self.heuristics_value = self.heuristics()
+            self.cost_value = self.cost()
 
     # Build from list of list of strings the state of the board
     @staticmethod
@@ -187,9 +190,8 @@ class ZhedBoard:
         value = 0
         x, y = self.get_coordinates(self.move.starting_block)
         # find nearest goal
-        coordinates = (y, x)
         nearest_goal = reduce(
-            lambda curr, nxt: curr if self.manhattan(curr, coordinates) < self.manhattan(nxt, coordinates) else nxt,
+            lambda curr, nxt: curr if self.manhattan(curr, self.move.starting_block) < self.manhattan(nxt, self.move.starting_block) else nxt,
             self.goals)
         # if in same row or column as goal, lessen priority
         if x == nearest_goal[1] or y == nearest_goal[0]:
@@ -203,7 +205,7 @@ class ZhedBoard:
             value += 7
         elif self.move.move == BoardMove.UP and y < nearest_goal[0]:
             value += 7
-        return value + self.manhattan(nearest_goal, coordinates)
+        return value + self.manhattan(nearest_goal, self.move.starting_block)
 
     def cost(self):
         if self.is_goal:
