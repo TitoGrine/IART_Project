@@ -3,17 +3,6 @@ from graph.graph import Graph
 from puzzle_reader import read_file
 from datetime import datetime
 
-puzzle = read_file(16)
-game_board = ZhedBoard.build_from_file(puzzle)
-print(game_board)
-start_timestamp = datetime.now()
-graph = Graph(lambda node: node.is_goal, lambda node: ZhedBoard.get_all_operators(node.state))
-node = graph.a_star(game_board)
-end_timestamp = datetime.now()
-print(node)
-elapsed_time = end_timestamp - start_timestamp
-print("Elapsed Time: " + str(elapsed_time) + "ms")
-
 
 def get_boards_list(main_node):
     boards = []
@@ -21,7 +10,7 @@ def get_boards_list(main_node):
 
     while True:
         boards.append(node.state.board_state)
-        if node.parent == None:
+        if node.parent is None:
             break
         else:
             node = node.parent
@@ -37,3 +26,40 @@ def run_puzzle(puzzle):
     node = graph.a_star(game_board)
 
     return get_boards_list(node)
+
+
+algorithms = {
+    "dfs": lambda graph, board: graph.dfs(board),
+    "bfs": lambda graph, board: graph.bfs(board),
+    "iterative_dfs": lambda graph, board: graph.iterative_dfs(board),
+    "uniform_cost": lambda graph, board: graph.uniform_cost(board),
+    "a_star": lambda graph, board: graph.a_star(board)
+}
+
+
+def run_puzzle_with_algorithm(num, algorithm_type):
+    puzzle = read_file(num)
+    print(num, end=",")
+    game_board = ZhedBoard.build_from_file(puzzle)
+    start_timestamp = datetime.now()
+    graph = Graph(lambda node: node.is_goal, lambda node: ZhedBoard.get_all_operators(node.state))
+    node = algorithms[algorithm_type](graph, game_board)
+    end_timestamp = datetime.now()
+    elapsed_time = end_timestamp - start_timestamp
+    print(elapsed_time)
+    return node
+
+
+def get_solution(board_state):
+    graph = Graph(lambda node: node.is_goal, lambda node: ZhedBoard.get_all_operators(node.state))
+    node = algorithms["a_star"](graph, board_state)
+    solution = []
+    while node is not None:
+        solution.insert(0, node.state)
+        node = node.parent
+    return solution
+
+
+print("Puzzle Number, Expanded Nodes, Elapsed Time")
+# run_puzzle_with_algorithm(5, "a_star")
+solution = get_solution(ZhedBoard.build_from_file(read_file(5)))
