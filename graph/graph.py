@@ -30,6 +30,7 @@ class Graph:
         # visited and enqueue it
         visited[s] = True
         n = 0
+        solution = None
         while True:
 
             # Dequeue a vertex from
@@ -47,10 +48,14 @@ class Graph:
             # visited and enqueue it
             for i in self.graph[s]:
                 if self.validation_function(i.state):
-                    return s
+                    solution = s
+                    break
                 elif not visited[i]:
                     function(i, queue, visited, n)
             n += 1
+        print(n, end=",")
+        return solution
+
 
     def __shortest_path(self, s, function):
 
@@ -61,7 +66,9 @@ class Graph:
         # Mark the source node as
         # visited and enqueue it
         n = 0
-        while True:
+        solution = None
+        finished = False
+        while not finished:
 
             # Dequeue a vertex from
             # queue and print it
@@ -74,10 +81,14 @@ class Graph:
             #     print("expanded " + str(s.state.move.starting_block) + str(s.state.move.move))
             for i in self.adding_edges(s):
                 if self.validation_function(i):
-                    return Node(i, parent=s)
+                    solution = Node(i, parent=s)
+                    finished = True
+                    break
                 else:
                     function(i, s, queue)
             n += 1
+        print(n, end=",")
+        return solution
 
     @staticmethod
     def __bfs(i, queue, visited, _):
@@ -98,7 +109,7 @@ class Graph:
         return True
 
     @staticmethod
-    def __dijkstra(v, u, queue):
+    def __uniform_cost(v, u, queue):
         queue.put(Node(v, parent=u, heuristics=False))
 
     @staticmethod
@@ -114,8 +125,8 @@ class Graph:
     def iterative_dfs(self, s):
         return self.__run_graph(s, self.__iterative)
 
-    def dijkstra(self, s):
-        return self.__shortest_path(s, self.__dijkstra)
+    def uniform_cost(self, s):
+        return self.__shortest_path(s, self.__uniform_cost)
 
     def a_star(self, s):
         return self.__shortest_path(s, self.__a_star)
