@@ -8,4 +8,4 @@ class Node:
         return self.evaluate_node() < other.evaluate_node()
 
     def evaluate_node(self):
-        return self.state.cost() + self.state.heuristics() if self.heuristics else 0
+        return self.state.cost_value + (self.state.heuristics_value if self.heuristics else 0)

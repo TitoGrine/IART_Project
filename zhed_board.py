@@ -2,6 +2,8 @@ from dataclasses import dataclass
 from enum import Enum
 import sys
 from copy import deepcopy
+from functools import reduce
+import math
 
 
 class BoardState(Enum):
@@ -21,7 +23,9 @@ class BoardMove(Enum):
 class Move:
     move: BoardMove
     starting_block: tuple
-    num_blocks: int
+    finish_block: tuple
+    placed_blocks: list
+    used_blocks: int
 
 
 # Class to save state of Zhed Board
@@ -36,12 +40,16 @@ class ZhedBoard:
         "X": BoardState.GOAL
     }
 
-    def __init__(self, board_state, goals, numbered, is_goal=False, move=None):
+    def __init__(self, board_state, goals, numbered, align_numbered, is_goal=False, move=None):
+        self.align_numbered = align_numbered
         self.is_goal = is_goal
         self.numbered = numbered
         self.goals = goals
         self.board_state = board_state
         self.move = move
+        if move is not None:
+            self.heuristics_value = self.heuristics()
+            self.cost_value = self.cost()
 
     # Build from list of list of strings the state of the board
     @staticmethod
@@ -61,7 +69,11 @@ class ZhedBoard:
                     numbered.append((i, j))
                 row.append(piece)
             board.append(row)
-        return ZhedBoard(board, goals, numbered)
+
+        aligned_numbered = list(filter(
+            lambda x: len(list(filter(lambda y: y[0] == x[0] or x[1] == y[1], goals))) > 0, numbered))
+
+        return ZhedBoard(board, goals, numbered, aligned_numbered)
 
     @staticmethod
     def get_coordinates(numbered_block):
@@ -74,7 +86,9 @@ class ZhedBoard:
         x, y = self.get_coordinates(numbered_block)
         board_state = deepcopy(self.board_state)
         num_blocks = board_state[y][x]
+        used_blocks = num_blocks + 0 if self.move is None else self.move.used_blocks
         row = board_state[y]
+        placed_blocks = []
         goal = self.is_goal
         row[x] = BoardState.FILLED
         while num_blocks > 0 and x > 0:
@@ -84,18 +98,21 @@ class ZhedBoard:
                 break
             if row[x] == BoardState.EMPTY:
                 row[x] = BoardState.FILLED
+                placed_blocks.append((y, x))
                 num_blocks -= 1
         numbered = self.numbered.copy()
         numbered.remove(numbered_block)
-        return ZhedBoard(board_state, self.goals.copy(), numbered, is_goal=goal,
-                         move=Move(BoardMove.LEFT, numbered_block, num_blocks))
+        return ZhedBoard(board_state, self.goals.copy(), numbered, self.align_numbered, is_goal=goal,
+                         move=Move(BoardMove.LEFT, numbered_block, (y, x), placed_blocks, used_blocks))
 
     # Builds the board state if the right operator is chosen on a given numbered blocks coordinate
     def right(self, numbered_block):
         x, y = self.get_coordinates(numbered_block)
         board_state = deepcopy(self.board_state)
         num_blocks = board_state[y][x]
+        used_blocks = num_blocks + 0 if self.move is None else self.move.used_blocks
         row = board_state[y]
+        placed_blocks = []
         goal = self.is_goal
         row[x] = BoardState.FILLED
         while num_blocks > 0 and x < len(row) - 1:
@@ -105,18 +122,21 @@ class ZhedBoard:
                 break
             if row[x] == BoardState.EMPTY:
                 row[x] = BoardState.FILLED
+                placed_blocks.append((y, x))
                 num_blocks -= 1
 
         numbered = self.numbered.copy()
         numbered.remove(numbered_block)
-        return ZhedBoard(board_state, self.goals.copy(), numbered, is_goal=goal,
-                         move=Move(BoardMove.RIGHT, numbered_block, num_blocks))
+        return ZhedBoard(board_state, self.goals.copy(), numbered, self.align_numbered, is_goal=goal,
+                         move=Move(BoardMove.RIGHT, numbered_block, (y, x), placed_blocks, used_blocks))
 
     # Builds the board state if the up operator is chosen on a given numbered blocks coordinate
     def up(self, numbered_block):
         x, y = self.get_coordinates(numbered_block)
         board_state = deepcopy(self.board_state)
         num_blocks = board_state[y][x]
+        used_blocks = num_blocks + 0 if self.move is None else self.move.used_blocks
+        placed_blocks = []
         goal = self.is_goal
         board_state[y][x] = BoardState.FILLED
         while num_blocks > 0 and y > 0:
@@ -126,18 +146,21 @@ class ZhedBoard:
                 break
             if board_state[y][x] == BoardState.EMPTY:
                 board_state[y][x] = BoardState.FILLED
+                placed_blocks.append((y, x))
                 num_blocks -= 1
 
         numbered = self.numbered.copy()
         numbered.remove(numbered_block)
-        return ZhedBoard(board_state, self.goals.copy(), numbered, is_goal=goal,
-                         move=Move(BoardMove.UP, numbered_block, num_blocks))
+        return ZhedBoard(board_state, self.goals.copy(), numbered, self.align_numbered, is_goal=goal,
+                         move=Move(BoardMove.UP, numbered_block, (y, x), placed_blocks, used_blocks))
 
     # Builds the board state if the down operator is chosen on a given numbered blocks coordinate
     def down(self, numbered_block):
         x, y = self.get_coordinates(numbered_block)
         board_state = deepcopy(self.board_state)
         num_blocks = board_state[y][x]
+        used_blocks = num_blocks + 0 if self.move is None else self.move.used_blocks
+        placed_blocks = []
         goal = self.is_goal
         board_state[y][x] = BoardState.FILLED
         while num_blocks > 0 and y < len(board_state) - 1:
@@ -147,12 +170,13 @@ class ZhedBoard:
                 break
             if board_state[y][x] == BoardState.EMPTY:
                 board_state[y][x] = BoardState.FILLED
+                placed_blocks.append((y, x))
                 num_blocks -= 1
 
         numbered = self.numbered.copy()
         numbered.remove(numbered_block)
-        return ZhedBoard(board_state, self.goals.copy(), numbered, is_goal=goal,
-                         move=Move(BoardMove.DOWN, numbered_block, num_blocks))
+        return ZhedBoard(board_state, self.goals.copy(), numbered, self.align_numbered, is_goal=goal,
+                         move=Move(BoardMove.DOWN, numbered_block, (y, x), placed_blocks, used_blocks))
 
     # Gets all the operators from the current board state
     @staticmethod
@@ -169,9 +193,107 @@ class ZhedBoard:
                 operators.append(self.up(i))
         return operators
 
+    @staticmethod
+    def manhattan(self, other):
+        return abs(self[0] - other[0]) + abs(self[1] - other[1])
+
     def heuristics(self):
-        # TODO: Add heuristic to compare states
-        return 0
+        value = 0
+        x, y = self.get_coordinates(self.move.starting_block)
+        # find nearest goal
+        nearest_goal = self.get_nearest(self.move.starting_block, self.goals)
+
+        edge_expand = True
+        if self.move.move == BoardMove.LEFT:
+            if nearest_goal[1] < x:
+                edge_expand = False
+            else:
+                for i in self.numbered:
+                    if i[1] < x:
+                        edge_expand = False
+                        break
+        elif self.move.move == BoardMove.RIGHT:
+            if nearest_goal[1] > x:
+                edge_expand = False
+            else:
+                for i in self.numbered:
+                    if i[1] > x:
+                        edge_expand = False
+                        break
+        elif self.move.move == BoardMove.DOWN:
+            if nearest_goal[0] > y:
+                edge_expand = False
+            else:
+                for i in self.numbered:
+                    if i[0] > y:
+                        edge_expand = False
+                        break
+        elif self.move.move == BoardMove.UP:
+            if nearest_goal[0] < y:
+                edge_expand = False
+            else:
+                for i in self.numbered:
+                    if i[0] < y:
+                        edge_expand = False
+                        break
+        if edge_expand:
+            return 1000
+
+        if len(self.numbered) > 2:
+            # if in same row or column as goal, lessen priority
+            if x == nearest_goal[1] or y == nearest_goal[0]:
+                value += 9  # value subject to change
+
+            # if expanding away from goal, lessen priority
+            if self.move.move == BoardMove.LEFT and x < nearest_goal[1]:
+                value += 7
+            elif self.move.move == BoardMove.RIGHT and x > nearest_goal[1]:
+                value += 7
+            elif self.move.move == BoardMove.DOWN and y > nearest_goal[0]:
+                value += 7
+            elif self.move.move == BoardMove.UP and y < nearest_goal[0]:
+                value += 7
+
+        nearest_dist = self.manhattan(self.move.starting_block,
+                                      self.get_nearest(self.move.starting_block, self.align_numbered)) \
+            if len(self.numbered) > 0 else -self.manhattan(self.move.starting_block,
+                                                           self.get_nearest(self.move.starting_block,
+                                                                            self.align_numbered))
+
+        goal_dist = self.manhattan(nearest_goal, self.move.finish_block) \
+            if len(self.numbered) > 0 else - self.manhattan(nearest_goal, self.move.finish_block)
+
+        for block in self.move.placed_blocks:
+            x = block[1]
+            y = block[0]
+            for i in self.numbered:
+
+                if i[0] == y:
+
+                    if abs(i[1] - x) <= self.board_state[i[0]][i[1]]:
+                        value -= 10
+                if i[1] == x:
+
+                    if abs(i[0] - y) <= self.board_state[i[0]][i[1]]:
+                        value -= 10
+        return value + goal_dist + nearest_dist
+
+    def get_nearest(self, coordinates, coordinates_list):
+        return reduce(
+            lambda curr, nxt: curr if self.manhattan(curr, coordinates) <
+                                      self.manhattan(nxt, coordinates) else nxt, coordinates_list)
+
+    def is_the_same_quadrant(self):
+        nearest_goal = self.get_nearest(self.move.starting_block, self.goals)
+        x_quadrant = len(self.board_state[0]) / 2
+        y_quadrant = len(self.board_state) / 2
+        goal_quadrant = (math.ceil(nearest_goal[0] / y_quadrant), math.ceil(nearest_goal[1] / x_quadrant))
+        finish_quadrant = (math.ceil(self.move.finish_block[0] / y_quadrant),
+                           math.ceil(self.move.finish_block[1] / x_quadrant))
+        return goal_quadrant == finish_quadrant
 
     def cost(self):
-        return -sys.maxsize if self.is_goal else 0
+        if self.is_goal:
+            return -sys.maxsize
+
+        return self.move.used_blocks
