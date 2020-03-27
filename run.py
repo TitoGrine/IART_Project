@@ -50,5 +50,16 @@ def run_puzzle_with_algorithm(num, algorithm_type):
     return node
 
 
+def get_solution(board_state):
+    graph = Graph(lambda node: node.is_goal, lambda node: ZhedBoard.get_all_operators(node.state))
+    node = algorithms["a_star"](graph, board_state)
+    solution = []
+    while node is not None:
+        solution.insert(0, node.state)
+        node = node.parent
+    return solution
+
+
 print("Puzzle Number, Expanded Nodes, Elapsed Time")
-run_puzzle_with_algorithm(5, "a_star")
+# run_puzzle_with_algorithm(5, "a_star")
+solution = get_solution(ZhedBoard.build_from_file(read_file(5)))
