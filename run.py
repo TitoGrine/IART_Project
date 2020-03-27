@@ -3,13 +3,14 @@ from graph.graph import Graph
 from puzzle_reader import read_file
 from datetime import datetime
 
+
 def get_boards_list(main_node):
     boards = []
     node = main_node
 
     while True:
         boards.append(node.state.board_state)
-        if node.parent == None:
+        if node.parent is None:
             break
         else:
             node = node.parent
@@ -36,7 +37,7 @@ algorithms = {
 }
 
 
-def run_puzzle(num, algorithm_type):
+def run_puzzle_with_algorithm(num, algorithm_type):
     puzzle = read_file(num)
     print(num, end=",")
     game_board = ZhedBoard.build_from_file(puzzle)
@@ -50,4 +51,4 @@ def run_puzzle(num, algorithm_type):
 
 
 print("Puzzle Number, Expanded Nodes, Elapsed Time")
-run_puzzle(5, "a_star")
+run_puzzle_with_algorithm(5, "a_star")
