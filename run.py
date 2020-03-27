@@ -45,9 +45,9 @@ def run_puzzle(num, algorithm_type):
     node = algorithms[algorithm_type](graph, game_board)
     end_timestamp = datetime.now()
     elapsed_time = end_timestamp - start_timestamp
-    print(elapsed_time)
+    print(elapsed_time.microseconds)
     return node
 
 
 print("Puzzle Number, Expanded Nodes, Elapsed Time")
-run_puzzle(5, "a_star")
+run_puzzle(20, "a_star")
