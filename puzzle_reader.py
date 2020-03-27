@@ -35,3 +35,4 @@ def padd_board(board):
         padded_board.append(row)
 
     return padded_board
+    
