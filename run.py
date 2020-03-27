@@ -2,6 +2,9 @@ from zhed_board import ZhedBoard
 from graph.graph import Graph
 from puzzle_reader import read_file
 from datetime import datetime
+from heuristics import heuristics
+import sys
+
 
 def get_boards_list(main_node):
     boards = []
@@ -49,5 +52,13 @@ def run_puzzle(num, algorithm_type):
     return node
 
 
-print("Puzzle Number, Expanded Nodes, Elapsed Time")
-run_puzzle(20, "a_star")
+def run_statistics(puzzles):
+    for filename, heuristic in heuristics.items():
+        sys.stdout = open(filename + ".csv", "w")
+        print("Puzzle Number, Expanded Nodes, Elapsed Time")
+        ZhedBoard.heuristics_function = heuristic
+        for i in puzzles:
+            run_puzzle(i, "a_star")
+
+
+run_statistics([1, 2, 3, 4])

@@ -22,6 +22,8 @@ class ZhedBoard:
         "X": BoardState.GOAL
     }
 
+    heuristics_function = None
+
     def __init__(self, board_state, goals, numbered, align_numbered, is_goal=False, move=None):
         self.align_numbered = align_numbered
         self.is_goal = is_goal
@@ -30,7 +32,8 @@ class ZhedBoard:
         self.board_state = board_state
         self.move = move
         if move is not None:
-            self.heuristics_value = self.heuristics()
+            goal = self.get_nearest(self.move.starting_block, self.goals)
+            self.heuristics_value = self.heuristics_function(goal)
             self.cost_value = self.cost()
 
     # Build from list of list of strings the state of the board
@@ -198,9 +201,9 @@ class ZhedBoard:
     def heuristics(self):
         value = 0
         nearest_goal = self.get_nearest(self.move.starting_block, self.goals)
-        nearest_dist = hs.nearest_dist(self, nearest_goal)
+        nearest_dist = hs.nearest_dist(self,)
         goal_dist = hs.nearest_goal(self, nearest_goal)
-        value += hs.in_direction_of_goal(self, nearest_goal)
+        value += hs.in_direction_of_goal(self)
         value += hs.punish_bad_expansions(self, nearest_goal)
         value += hs.benefit_outered_blocks(self, nearest_goal)
         return value + goal_dist + nearest_dist
