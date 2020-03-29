@@ -193,6 +193,22 @@ class ZhedBoard:
                 operators.append(self.up(i))
         return operators
 
+    # Gets all the operators from the current board state
+    @staticmethod
+    def get_all_expandables(self, coords):
+        placed = []
+
+        if coords[1] > 0:
+            placed.append(self.left(coords).move.placed_blocks)
+        if coords[1] < (len(self.board_state[coords[0]])) - 1:
+            placed.append(self.right(coords).move.placed_blocks)
+        if coords[0] < (len(self.board_state)) - 1:
+            placed.append(self.down(coords).move.placed_blocks)
+        if coords[0] > 0:
+            placed.append(self.up(coords).move.placed_blocks)
+
+        return placed
+
     @staticmethod
     def manhattan(self, other):
         return abs(self[0] - other[0]) + abs(self[1] - other[1])

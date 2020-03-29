@@ -25,43 +25,77 @@ class GameColors:
 
     BACKGROUND = (97, 200, 188)
 
+    WHITE = (255, 255, 255)
+
+
 class BoardSettings:
     def __init__(self, window, font):
         self.window = window
         self.font = font
 
 
+class Tile(pygame.sprite.Sprite):
+    def __init__(self, font, symbol, text_color, window, tile_color, x_pos, y_pos, x=-1, y=-1):
+        super().__init__()
 
-def draw_tile(font, symbol, text_color, window, tile_color, x_pos, y_pos):
-    text = font.render(symbol, True, text_color)
-    pygame.draw.rect(window, tile_color, (x_pos, y_pos, size, size))
-    window.blit(text, (x_pos + round((size - text.get_width())/2),
-                       y_pos + round((size - text.get_height())/2)))
+        self.x = x
+        self.y = y
 
-def draw_board(settings, board, side, index, last) :
+        self.image = pygame.Surface([size, size])
+        self.image.fill(GameColors.WHITE)
+        self.image.set_colorkey(GameColors.WHITE)
+
+        self.tile = pygame.Rect((x_pos, y_pos, size, size))
+        text = font.render(symbol, True, text_color)
+        pygame.draw.rect(window, tile_color, self.tile)
+        window.blit(text, (x_pos + round((size - text.get_width()) / 2),
+                           y_pos + round((size - text.get_height()) / 2)))
+
+        self.rect = self.image.get_rect()
+
+
+def draw_board(settings, board, side, index, last, expandables=[]):
+    sprites = pygame.sprite.Group()
+    interactable_sprites = []
+
     for i in range(side):
-                y_pos = i * size + 10
-                for j in range(side):
-                    x_pos = j * size + 10
-                    tile = board[i][j]
+        y_pos = i * size + 10
+        for j in range(side):
+            x_pos = j * size + 10
+            tile = board[i][j]
 
-                    if tile == zhed_board.BoardState.GOAL:
-                        if last:
-                            draw_tile(settings.font, '◈', GameColors.COMPLETED_TEXT,
-                                      settings.window, GameColors.COMPLETED, x_pos, y_pos)
-                        else:
-                            draw_tile(settings.font, '◈', GameColors.GOAL_TEXT,
-                                      settings.window, GameColors.GOAL, x_pos, y_pos)
-                    elif tile == zhed_board.BoardState.EMPTY:
-                        empty_color = GameColors.empty_color()
-                        draw_tile(settings.font, ' ', empty_color, settings.window,
-                                  empty_color, x_pos, y_pos)
-                    elif tile == zhed_board.BoardState.FILLED:
-                        draw_tile(settings.font, '∙', GameColors.TILE_TEXT,
-                                  settings.window, GameColors.TILE, x_pos, y_pos)
-                    else:
-                        draw_tile(settings.font, str(tile), GameColors.TILE_TEXT,
-                                  settings.window, GameColors.TILE, x_pos, y_pos)
+            if tile == zhed_board.BoardState.GOAL:
+                if last:
+                    sprites.add(Tile(settings.font, '◈', GameColors.COMPLETED_TEXT,
+                                     settings.window, GameColors.COMPLETED, x_pos, y_pos))
+                else:
+                    sprites.add(Tile(settings.font, '◈', GameColors.GOAL_TEXT,
+                                     settings.window, GameColors.GOAL, x_pos, y_pos))
+            elif tile == zhed_board.BoardState.EMPTY:
+                empty_color = GameColors.empty_color()
+                sprites.add(Tile(settings.font, ' ', empty_color, settings.window,
+                                 empty_color, x_pos, y_pos))
+            elif tile == zhed_board.BoardState.FILLED:
+                sprites.add(Tile(settings.font, '∙', GameColors.TILE_TEXT,
+                                 settings.window, GameColors.TILE, x_pos, y_pos))
+            else:
+                tile = Tile(settings.font, str(tile), GameColors.TILE_TEXT,
+                            settings.window, GameColors.TILE, x_pos, y_pos, x=j, y=i)
+                sprites.add(tile)
+                interactable_sprites.append(tile)
+
+    for expandable in expandables:
+        for tile in expandable:
+            empty_color = GameColors.empty_color()
+            x_pos = tile[1] * size + 10
+            y_pos = tile[0] * size + 10
+            sprites.add(Tile(settings.font, '∙', GameColors.COMPLETED, settings.window,
+                            empty_color, x_pos, y_pos))
+
+    sprites.draw(settings.window)
+
+    return interactable_sprites
+
 
 def bot_playing(puzzle):
     pygame.init()
@@ -105,11 +139,21 @@ def bot_playing(puzzle):
                 key_press = False
 
         counter = (counter + 1) % 5
-        pygame.display.update()
+        pygame.display.flip()
 
     pygame.quit()
 
-def process_mouse(board, pos):
+
+def process_mouse(board, interactable, pos):
+    clicked_sprites = [s for s in interactable if s.tile.collidepoint(pos)]
+    print(clicked_sprites)
+
+    expandables = []
+
+    if len(clicked_sprites) != 0:
+        expandables = zhed_board.ZhedBoard.get_all_expandables(board, (clicked_sprites[0].y, clicked_sprites[0].x))
+
+    return expandables
 
 
 def player_playing(puzzle):
@@ -117,12 +161,10 @@ def player_playing(puzzle):
     pygame.display.set_caption("Zhed")
 
     font = pygame.font.SysFont('Arial', 37, 0, 0)
-    level = puzzle_reader.read_file(puzzle)
-    boards = run_puzzle(level)
+    level = puzzle_reader.padd_raw_board(puzzle_reader.read_file(puzzle))
+    board_state = zhed_board.ZhedBoard.build_from_file(level)
 
-    boards = list(map(lambda board: puzzle_reader.padd_board(board), boards))
-
-    side = len(boards[0])
+    side = len(board_state.board_state)
 
     window = pygame.display.set_mode((side * size + 20, side * size + 20))
     window.fill(GameColors.BACKGROUND)
@@ -132,20 +174,31 @@ def player_playing(puzzle):
     key_press = True
 
     settings = BoardSettings(window, font)
+    expandables = []
 
     while run:
         pygame.time.delay(50)
 
-        board = boards[index]
+        interactable = []
 
         if key_press or counter == 0:
-            draw_board(settings, board, side, index, len(boards) - 1)
+            interactable = draw_board(settings, board_state.board_state, side, index, False, expandables=expandables)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
             elif event.type == pygame.MOUSEBUTTONUP:
-                board = process_mouse(board, pygame.mouse.get_pos())
+                expandables = process_mouse(board_state, interactable, pygame.mouse.get_pos())
+            elif event.type == pygame.KEYDOWN:
+                key_press = True
+                if event.key == pygame.K_UP:
+                    board = zhed_board.ZhedBoard.up()
+                elif event.key == pygame.K_DOWN:
+                    board = zhed_board.ZhedBoard.down()
+                elif event.key == pygame.K_RIGHT:
+                    board = zhed_board.ZhedBoard.right()
+                elif event.key == pygame.K_LEFT:
+                    board = zhed_board.ZhedBoard.left()
             else:
                 key_press = False
 
@@ -154,4 +207,5 @@ def player_playing(puzzle):
 
     pygame.quit()
 
-bot_playing(16)
+
+player_playing(16)
