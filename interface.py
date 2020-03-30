@@ -146,7 +146,6 @@ def bot_playing(puzzle):
 
 def process_mouse(board, interactable, pos):
     clicked_sprites = [s for s in interactable if s.tile.collidepoint(pos)]
-    print(clicked_sprites)
     clicked_pos = None
     expandables = []
 
@@ -177,11 +176,10 @@ def player_playing(puzzle):
     settings = BoardSettings(window, font)
     expandables = []
     clicked_pos = None
+    interactable = []
 
     while run:
         pygame.time.delay(50)
-
-        interactable = []
 
         if key_press or counter == 0:
             interactable = draw_board(settings, board_state.board_state, side, index, False, expandables=expandables)
