@@ -147,13 +147,14 @@ def bot_playing(puzzle):
 def process_mouse(board, interactable, pos):
     clicked_sprites = [s for s in interactable if s.tile.collidepoint(pos)]
     print(clicked_sprites)
-
+    clicked_pos = None
     expandables = []
 
     if len(clicked_sprites) != 0:
-        expandables = zhed_board.ZhedBoard.get_all_expandables(board, (clicked_sprites[0].y, clicked_sprites[0].x))
+        clicked_pos = (clicked_sprites[0].y, clicked_sprites[0].x)
+        expandables = zhed_board.ZhedBoard.get_all_expandables(board, clicked_pos)
 
-    return expandables
+    return expandables, clicked_pos
 
 
 def player_playing(puzzle):
@@ -175,6 +176,7 @@ def player_playing(puzzle):
 
     settings = BoardSettings(window, font)
     expandables = []
+    clicked_pos = None
 
     while run:
         pygame.time.delay(50)
@@ -188,17 +190,21 @@ def player_playing(puzzle):
             if event.type == pygame.QUIT:
                 run = False
             elif event.type == pygame.MOUSEBUTTONUP:
-                expandables = process_mouse(board_state, interactable, pygame.mouse.get_pos())
+                expandables, clicked_pos = process_mouse(board_state, interactable, pygame.mouse.get_pos())
             elif event.type == pygame.KEYDOWN:
                 key_press = True
-                if event.key == pygame.K_UP:
-                    board = zhed_board.ZhedBoard.up()
-                elif event.key == pygame.K_DOWN:
-                    board = zhed_board.ZhedBoard.down()
-                elif event.key == pygame.K_RIGHT:
-                    board = zhed_board.ZhedBoard.right()
-                elif event.key == pygame.K_LEFT:
-                    board = zhed_board.ZhedBoard.left()
+                if clicked_pos != None:
+                    if event.key == pygame.K_UP:
+                        board_state = board_state.up(clicked_pos)
+                    elif event.key == pygame.K_DOWN:
+                        board_state = board_state.down(clicked_pos)
+                    elif event.key == pygame.K_RIGHT:
+                        board_state = board_state.right(clicked_pos)
+                    elif event.key == pygame.K_LEFT:
+                        board_state = board_state.left(clicked_pos)
+
+                    clicked_pos = None
+                    expandables = []
             else:
                 key_press = False
 
