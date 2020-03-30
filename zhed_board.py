@@ -4,31 +4,13 @@ import sys
 from copy import deepcopy
 from functools import reduce
 import math
-
-
-class BoardState(Enum):
-    GOAL = -2
-    EMPTY = -1
-    FILLED = 0
-
-
-class BoardMove(Enum):
-    RIGHT = 0
-    LEFT = 1
-    UP = 2
-    DOWN = 3
-
-
-@dataclass
-class Move:
-    move: BoardMove
-    starting_block: tuple
-    finish_block: tuple
-    placed_blocks: list
-    used_blocks: int
+import heuristics as hs
 
 
 # Class to save state of Zhed Board
+from zhed.model import *
+
+
 class ZhedBoard:
     """" Constructor
     :param board_state: list of lists with the state of the board
@@ -40,6 +22,8 @@ class ZhedBoard:
         "X": BoardState.GOAL
     }
 
+    heuristics_function = None
+
     def __init__(self, board_state, goals, numbered, align_numbered, is_goal=False, move=None):
         self.align_numbered = align_numbered
         self.is_goal = is_goal
@@ -48,7 +32,8 @@ class ZhedBoard:
         self.board_state = board_state
         self.move = move
         if move is not None:
-            self.heuristics_value = self.heuristics()
+            goal = self.get_nearest(self.move.starting_block, self.goals)
+            self.heuristics_value = self.heuristics_function(goal)
             self.cost_value = self.cost()
 
     # Build from list of list of strings the state of the board
@@ -215,83 +200,12 @@ class ZhedBoard:
 
     def heuristics(self):
         value = 0
-        x, y = self.get_coordinates(self.move.starting_block)
-        # find nearest goal
         nearest_goal = self.get_nearest(self.move.starting_block, self.goals)
-
-        edge_expand = True
-        if self.move.move == BoardMove.LEFT:
-            if nearest_goal[1] < x:
-                edge_expand = False
-            else:
-                for i in self.numbered:
-                    if i[1] < x:
-                        edge_expand = False
-                        break
-        elif self.move.move == BoardMove.RIGHT:
-            if nearest_goal[1] > x:
-                edge_expand = False
-            else:
-                for i in self.numbered:
-                    if i[1] > x:
-                        edge_expand = False
-                        break
-        elif self.move.move == BoardMove.DOWN:
-            if nearest_goal[0] > y:
-                edge_expand = False
-            else:
-                for i in self.numbered:
-                    if i[0] > y:
-                        edge_expand = False
-                        break
-        elif self.move.move == BoardMove.UP:
-            if nearest_goal[0] < y:
-                edge_expand = False
-            else:
-                for i in self.numbered:
-                    if i[0] < y:
-                        edge_expand = False
-                        break
-        if edge_expand:
-            return 1000
-
-        if len(self.numbered) > 2:
-            # if in same row or column as goal, lessen priority
-            if x == nearest_goal[1] or y == nearest_goal[0]:
-                value += 9  # value subject to change
-
-            # if expanding away from goal, lessen priority
-            if self.move.move == BoardMove.LEFT and x < nearest_goal[1]:
-                value += 7
-            elif self.move.move == BoardMove.RIGHT and x > nearest_goal[1]:
-                value += 7
-            elif self.move.move == BoardMove.DOWN and y > nearest_goal[0]:
-                value += 7
-            elif self.move.move == BoardMove.UP and y < nearest_goal[0]:
-                value += 7
-
-        nearest_dist = self.manhattan(self.move.starting_block,
-                                      self.get_nearest(self.move.starting_block, self.align_numbered)) \
-            if len(self.numbered) > 0 else -self.manhattan(self.move.starting_block,
-                                                           self.get_nearest(self.move.starting_block,
-                                                                            self.align_numbered))
-
-        goal_dist = self.manhattan(nearest_goal, self.move.finish_block) \
-            if len(self.numbered) > 0 else - self.manhattan(nearest_goal, self.move.finish_block)
-
-        for block in self.move.placed_blocks:
-            x = block[1]
-            y = block[0]
-            for i in self.numbered:
-
-                if i[0] == y:
-
-                    if abs(i[1] - x) <= self.board_state[i[0]][i[1]]:
-                        value -= 10
-                if i[1] == x:
-
-                    if abs(i[0] - y) <= self.board_state[i[0]][i[1]]:
-                        value -= 10
+        nearest_dist = hs.nearest_dist(self,)
+        goal_dist = hs.nearest_goal(self, nearest_goal)
+        value += hs.in_direction_of_goal(self)
+        value += hs.punish_bad_expansions(self, nearest_goal)
+        value += hs.benefit_outered_blocks(self, nearest_goal)
         return value + goal_dist + nearest_dist
 
     def get_nearest(self, coordinates, coordinates_list):
