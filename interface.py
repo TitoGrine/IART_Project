@@ -4,7 +4,7 @@ from run import run_puzzle
 import puzzle_reader
 import random
 
-size = 70
+size = 65
 deviance = 0
 
 
@@ -54,7 +54,7 @@ class Tile(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
 
 
-class Title():
+class Title:
     text_display: pygame.Surface
 
     def __init__(self, text, text_color, size):
@@ -91,10 +91,11 @@ class Button(pygame.sprite.Sprite):
         pygame.draw.rect(window, border_color, self.rect, 3)
 
     def trigger(self):
-        if self.args == []:
+        if len(self.args) == 0:
             return self.action()
         else:
             return self.action(self.args[0])
+
 
 class TextField(pygame.sprite.Sprite):
     def __init__(self, font, text, text_color, window, background_color, width, height, x_pos, y_pos):
@@ -113,6 +114,7 @@ class TextField(pygame.sprite.Sprite):
                                    y_pos + round((height - text_display.get_height()) / 2)))
 
         self.rect = self.image.get_rect()
+
 
 def process_mouse(board, interactable, pos):
     clicked_sprites = [s for s in interactable if s.tile.collidepoint(pos)]
@@ -196,13 +198,14 @@ def draw_buttons(settings, button_objs):
     buttons.draw(settings.window)
 
 
-def check_button_clicks(buttons, pos):
+def check_button_clicks(buttons, pos, condition=True):
     clicked_buttons = [s for s in buttons if s.tile.collidepoint(pos)]
 
-    if len(clicked_buttons) != 0:
+    if len(clicked_buttons) != 0 and condition:
         clicked_buttons[0].trigger()
 
-def level_menu():
+
+def level_menu(game_mode):
     pygame.init()
     pygame.display.set_caption("Zhed")
 
@@ -230,16 +233,17 @@ def level_menu():
         TextField(font, "Level: " + value, GameColors.TILE_TEXT,
                             settings.window, GameColors.TILE, size * 6, round(size * 1.5), size + 10, round(size * 3.5) + 10)
 
+        buttons.clear()
         buttons.append(Button(settings.font, "∙  START  ∙", GameColors.GOAL_TEXT,
-                            settings.window, GameColors.GOAL, size * 6, round(size * 1.5), size + 10, round(size * 5.5) + 10, bot_playing, arguments=[3]))
+                            settings.window, GameColors.GOAL, size * 6, round(size * 1.5), size + 10, round(size * 5.5) + 10, game_mode, arguments=[1 if len(value) == 0 else int(value)]))
 
         draw_buttons(settings, buttons)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
-            elif event.type == pygame.MOUSEBUTTONUP:
-                check_button_clicks(buttons, pygame.mouse.get_pos())
+            elif event.type == pygame.MOUSEBUTTONUP and len(value) != 0:
+                check_button_clicks(buttons, pygame.mouse.get_pos(), condition=bool(int(value) > 0 and int(value) <= 101))
             elif event.type == pygame.KEYDOWN:
                 if len(value) < 3:
                     if event.key == pygame.K_0:
@@ -299,10 +303,10 @@ def mode_menu():
         title.draw(window, 0, 0, size * 8 + 20, size * 3.5 + 10)
 
         buttons.append(Button(settings.font, "∙  PLAYER MODE  ∙", GameColors.GOAL_TEXT,
-                            settings.window, GameColors.GOAL, size * 6, round(size * 1.5), size + 10, round(size * 3.5) + 10, level_menu))
+                            settings.window, GameColors.GOAL, size * 6, round(size * 1.5), size + 10, round(size * 3.5) + 10, level_menu, arguments=[player_playing]))
                             
         buttons.append(Button(settings.font, "∙  BOT SOLUTION  ∙", GameColors.GOAL_TEXT,
-                            settings.window, GameColors.GOAL, size * 6, round(size * 1.5), size + 10, round(size * 5.5) + 10, level_menu))
+                            settings.window, GameColors.GOAL, size * 6, round(size * 1.5), size + 10, round(size * 5.5) + 10, level_menu, arguments=[bot_playing]))
 
         draw_buttons(settings, buttons)
 
@@ -344,8 +348,8 @@ def main_menu():
         buttons.append(Button(settings.font, "∙  PLAY  ∙", GameColors.GOAL_TEXT,
                             settings.window, GameColors.GOAL, size * 6, round(size * 1.5), size + 10, round(size * 3.5) + 10, mode_menu))
                             
-        buttons.append(Button(settings.font, "∙  INSTRUCTIONS  ∙", GameColors.GOAL_TEXT,
-                            settings.window, GameColors.GOAL, size * 6, round(size * 1.5), size + 10, round(size * 5.5) + 10, player_playing))
+        buttons.append(Button(settings.font, "∙  QUIT  ∙", GameColors.GOAL_TEXT,
+                            settings.window, GameColors.GOAL, size * 6, round(size * 1.5), size + 10, round(size * 5.5) + 10, lambda: pygame.quit()))
 
         draw_buttons(settings, buttons)
 
@@ -399,13 +403,15 @@ def bot_playing(puzzle):
                     index += 1
                 elif event.key == pygame.K_LEFT and index != 0:
                     index -= 1
+                elif event.key == pygame.K_ESCAPE:
+                    run = False
             else:
                 key_press = False
 
         counter = (counter + 1) % 5
         pygame.display.flip()
 
-    pygame.quit()
+    main_menu()
 
 
 def player_playing(puzzle):
@@ -449,6 +455,8 @@ def player_playing(puzzle):
 
                 if event.key == pygame.K_r:
                     board_state = initial_board_state
+                elif event.key == pygame.K_ESCAPE:
+                    run = False
 
                 if clicked_pos != None:
                     if event.key == pygame.K_UP:
@@ -459,6 +467,7 @@ def player_playing(puzzle):
                         board_state = board_state.right(clicked_pos)
                     elif event.key == pygame.K_LEFT:
                         board_state = board_state.left(clicked_pos)
+                    
 
                     clicked_pos = None
                     expandables = []
@@ -472,7 +481,7 @@ def player_playing(puzzle):
         counter = (counter + 1) % 5
         pygame.display.update()
 
-    pygame.quit()
+    main_menu()
 
 
 main_menu()
