@@ -4,6 +4,7 @@ from graph.graph import Graph
 from run import run_puzzle
 import puzzle_reader
 import random
+import threading
 
 size = 65
 deviance = 0
@@ -80,7 +81,8 @@ class Title:
 
 
 class Button(pygame.sprite.Sprite):
-    def __init__(self, font, text, text_color, window, background_color, width, height, x_pos, y_pos, action, arguments=[]):
+    def __init__(self, font, text, text_color, window, background_color, width, height, x_pos, y_pos, action,
+                 arguments=[]):
         super().__init__()
 
         self.image = pygame.Surface([width, height])
@@ -173,7 +175,6 @@ def draw_board(settings, board, side, index, last, expandables=[], hints=Hint(Hi
 
     for expandable in expandables:
         for tile in expandable:
-
             build_tile(settings, sprites, tile, GameColors.COMPLETED, GameColors.empty_color(), '∙')
 
     if hints.hint is Hint.HINT:
@@ -246,11 +247,12 @@ def level_menu(game_mode):
         title.draw(window, 0, 0, size * 8 + 20, size * 3.5 + 10)
 
         TextField(font, "Level: " + value, GameColors.TILE_TEXT,
-                            settings.window, GameColors.TILE, size * 6, round(size * 1.5), size + 10, round(size * 3.5) + 10)
+                  settings.window, GameColors.TILE, size * 6, round(size * 1.5), size + 10, round(size * 3.5) + 10)
 
         buttons.clear()
         buttons.append(Button(settings.font, "∙  START  ∙", GameColors.GOAL_TEXT,
-                            settings.window, GameColors.GOAL, size * 6, round(size * 1.5), size + 10, round(size * 5.5) + 10, game_mode, arguments=[1 if len(value) == 0 else int(value)]))
+                              settings.window, GameColors.GOAL, size * 6, round(size * 1.5), size + 10,
+                              round(size * 5.5) + 10, game_mode, arguments=[1 if len(value) == 0 else int(value)]))
 
         draw_buttons(settings, buttons)
 
@@ -258,7 +260,8 @@ def level_menu(game_mode):
             if event.type == pygame.QUIT:
                 run = False
             elif event.type == pygame.MOUSEBUTTONUP and len(value) != 0:
-                check_button_clicks(buttons, pygame.mouse.get_pos(), condition=bool(int(value) > 0 and int(value) <= 101))
+                check_button_clicks(buttons, pygame.mouse.get_pos(),
+                                    condition=bool(int(value) > 0 and int(value) <= 101))
             elif event.type == pygame.KEYDOWN:
                 if len(value) < 3:
                     if event.key == pygame.K_0:
@@ -287,7 +290,10 @@ def level_menu(game_mode):
                         value = value[:-1]
 
         counter = (counter + 1) % 5
-        pygame.display.update()
+        try:
+            pygame.display.update()
+        except:
+            exit(0)
 
     pygame.quit()
 
@@ -318,10 +324,12 @@ def mode_menu():
         title.draw(window, 0, 0, size * 8 + 20, size * 3.5 + 10)
 
         buttons.append(Button(settings.font, "∙  PLAYER MODE  ∙", GameColors.GOAL_TEXT,
-                            settings.window, GameColors.GOAL, size * 6, round(size * 1.5), size + 10, round(size * 3.5) + 10, level_menu, arguments=[player_playing]))
-                            
+                              settings.window, GameColors.GOAL, size * 6, round(size * 1.5), size + 10,
+                              round(size * 3.5) + 10, level_menu, arguments=[player_playing]))
+
         buttons.append(Button(settings.font, "∙  BOT SOLUTION  ∙", GameColors.GOAL_TEXT,
-                            settings.window, GameColors.GOAL, size * 6, round(size * 1.5), size + 10, round(size * 5.5) + 10, level_menu, arguments=[bot_playing]))
+                              settings.window, GameColors.GOAL, size * 6, round(size * 1.5), size + 10,
+                              round(size * 5.5) + 10, level_menu, arguments=[bot_playing]))
 
         draw_buttons(settings, buttons)
 
@@ -361,10 +369,12 @@ def main_menu():
         title.draw(window, 0, 0, size * 8 + 20, size * 3.5 + 10)
 
         buttons.append(Button(settings.font, "∙  PLAY  ∙", GameColors.GOAL_TEXT,
-                            settings.window, GameColors.GOAL, size * 6, round(size * 1.5), size + 10, round(size * 3.5) + 10, mode_menu))
-                            
+                              settings.window, GameColors.GOAL, size * 6, round(size * 1.5), size + 10,
+                              round(size * 3.5) + 10, mode_menu))
+
         buttons.append(Button(settings.font, "∙  QUIT  ∙", GameColors.GOAL_TEXT,
-                            settings.window, GameColors.GOAL, size * 6, round(size * 1.5), size + 10, round(size * 5.5) + 10, lambda: pygame.quit()))
+                              settings.window, GameColors.GOAL, size * 6, round(size * 1.5), size + 10,
+                              round(size * 5.5) + 10, lambda: pygame.quit()))
 
         draw_buttons(settings, buttons)
 
@@ -439,10 +449,13 @@ def bot_playing(puzzle):
 def get_hint(board_state, hints):
     graph = Graph(lambda node: node.is_goal, lambda node: zhed_board.ZhedBoard.get_all_operators(node.state))
     moves = puzzle_reader.get_boards_list(graph.a_star(board_state))
-    if len(moves) > 1:
+    if moves is None or len(moves) > 1:
         hints.path.extend(moves[1].move.placed_blocks)
         hints.block = moves[1].move.starting_block
         hints.hint = Hint.HINT
+    else:
+        pygame.event.post(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_r))
+
 
 def player_playing(puzzle):
     pygame.init()
@@ -489,7 +502,7 @@ def player_playing(puzzle):
                 elif event.key == pygame.K_ESCAPE:
                     run = False
                 elif event.key == pygame.K_SPACE:
-                    get_hint(board_state, hints)
+                    threading.Thread(target=get_hint, args=(board_state, hints)).start()
 
                 if clicked_pos != None:
                     if event.key == pygame.K_UP:
@@ -500,7 +513,9 @@ def player_playing(puzzle):
                         board_state = board_state.right(clicked_pos)
                     elif event.key == pygame.K_LEFT:
                         board_state = board_state.left(clicked_pos)
-                    
+                    hints.hint = hints.NO_HINT
+                    hints.block = None
+                    hints.path = []
 
                     clicked_pos = None
                     expandables = []
@@ -512,6 +527,7 @@ def player_playing(puzzle):
             run = False
 
         counter = (counter + 1) % 5
+        # if pygame.display.
         pygame.display.update()
 
     main_menu()
