@@ -65,10 +65,10 @@ def get_boards_list(main_node):
     node = main_node
 
     while True:
-        boards.append(node.state)
-        if node.parent == None:
+        if node is None:
             break
         else:
+            boards.append(node.state)
             node = node.parent
 
     boards.reverse()

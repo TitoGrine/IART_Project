@@ -4,6 +4,7 @@ from graph.graph import Graph
 from run import run_puzzle
 import puzzle_reader
 import random
+import threading
 
 size = 70
 deviance = 0
@@ -180,10 +181,12 @@ def process_mouse(board, interactable, pos):
 def get_hint(board_state, hints):
     graph = Graph(lambda node: node.is_goal, lambda node: zhed_board.ZhedBoard.get_all_operators(node.state))
     moves = puzzle_reader.get_boards_list(graph.a_star(board_state))
-    if len(moves) > 1:
+    if moves is None or len(moves) > 1:
         hints.path.extend(moves[1].move.placed_blocks)
         hints.block = moves[1].move.starting_block
         hints.hint = Hint.HINT
+    else:
+        pygame.event.post(pygame.event.Event(pygame.KEYDOWN, key=pygame.K_r))
 
 def player_playing(puzzle):
     pygame.init()
@@ -227,7 +230,7 @@ def player_playing(puzzle):
                 if event.key == pygame.K_r:
                     board_state = initial_board_state
                 elif event.key == pygame.K_SPACE:
-                    get_hint(board_state, hints)
+                    threading.Thread(target=get_hint, args=(board_state, hints)).start()
 
                 if clicked_pos != None:
                     if event.key == pygame.K_UP:
@@ -238,6 +241,9 @@ def player_playing(puzzle):
                         board_state = board_state.right(clicked_pos)
                     elif event.key == pygame.K_LEFT:
                         board_state = board_state.left(clicked_pos)
+                    hints.hint = hints.NO_HINT
+                    hints.block = None
+                    hints.path = []
 
                     clicked_pos = None
                     expandables = []
