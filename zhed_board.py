@@ -9,11 +9,6 @@ from zhed.model import *
 
 
 class ZhedBoard:
-    """" Constructor
-    :param board_state: list of lists with the state of the board
-    :param goals: list of tuples with coordinates to the goals
-    :param numbered: list of tuples with coordinates to the numbered blocks
-    """
     types = {
         ".": BoardState.EMPTY,
         "X": BoardState.GOAL
@@ -22,6 +17,14 @@ class ZhedBoard:
     heuristics_function = None
 
     def __init__(self, board_state, goals, numbered, align_numbered, is_goal=False, move=None):
+        """" Constructor
+        :param board_state: list of lists with the state of the board
+        :param goals: list of tuples with coordinates to the goals
+        :param numbered: list of tuples with coordinates to the numbered blocks
+        :param align_numbered: list of tuples with coordinates of numbered blocks aligned with a goal
+        :param is_goal: is state an end goal
+        :param move: move that originated said state
+        """
         self.align_numbered = align_numbered
         self.is_goal = is_goal
         self.numbered = numbered
@@ -33,9 +36,11 @@ class ZhedBoard:
             self.heuristics_value = self.heuristics_function(goal)
             self.cost_value = self.cost()
 
-    # Build from list of list of strings the state of the board
     @staticmethod
     def build_from_file(board_state):
+        """" Build from list of list of strings the state of the board
+        :param board_state: list of lists with the string states of the board
+        """
         goals = []
         numbered = []
         board = []
@@ -59,12 +64,17 @@ class ZhedBoard:
 
     @staticmethod
     def get_coordinates(numbered_block):
+        """" Get the coordinates of the numbered block
+        :param numbered_block: tuple with the coordinates of the block
+        """
         y = numbered_block[0]
         x = numbered_block[1]
         return x, y
 
-    # Builds the board state if the left operator is chosen on a given numbered blocks coordinate
     def left(self, numbered_block):
+        """" Builds the board state if the left operator is chosen on a given numbered blocks coordinate
+        :param numbered_block: tuple with the coordinates of the block to expand
+        """
         x, y = self.get_coordinates(numbered_block)
         board_state = deepcopy(self.board_state)
         num_blocks = board_state[y][x]
@@ -87,8 +97,10 @@ class ZhedBoard:
         return ZhedBoard(board_state, self.goals.copy(), numbered, self.align_numbered, is_goal=goal,
                          move=Move(BoardMove.LEFT, numbered_block, (y, x), placed_blocks, used_blocks))
 
-    # Builds the board state if the right operator is chosen on a given numbered blocks coordinate
     def right(self, numbered_block):
+        """" Builds the board state if the right operator is chosen on a given numbered blocks coordinate
+        :param numbered_block: tuple with the coordinates of the block to expand
+        """
         x, y = self.get_coordinates(numbered_block)
         board_state = deepcopy(self.board_state)
         num_blocks = board_state[y][x]
@@ -112,8 +124,10 @@ class ZhedBoard:
         return ZhedBoard(board_state, self.goals.copy(), numbered, self.align_numbered, is_goal=goal,
                          move=Move(BoardMove.RIGHT, numbered_block, (y, x), placed_blocks, used_blocks))
 
-    # Builds the board state if the up operator is chosen on a given numbered blocks coordinate
     def up(self, numbered_block):
+        """" Builds the board state if the up operator is chosen on a given numbered blocks coordinate
+        :param numbered_block: tuple with the coordinates of the block to expand
+        """
         x, y = self.get_coordinates(numbered_block)
         board_state = deepcopy(self.board_state)
         num_blocks = board_state[y][x]
@@ -136,8 +150,10 @@ class ZhedBoard:
         return ZhedBoard(board_state, self.goals.copy(), numbered, self.align_numbered, is_goal=goal,
                          move=Move(BoardMove.UP, numbered_block, (y, x), placed_blocks, used_blocks))
 
-    # Builds the board state if the down operator is chosen on a given numbered blocks coordinate
     def down(self, numbered_block):
+        """" Builds the board state if the down operator is chosen on a given numbered blocks coordinate
+        :param numbered_block: tuple with the coordinates of the block to expand
+        """
         x, y = self.get_coordinates(numbered_block)
         board_state = deepcopy(self.board_state)
         num_blocks = board_state[y][x]
@@ -160,9 +176,11 @@ class ZhedBoard:
         return ZhedBoard(board_state, self.goals.copy(), numbered, self.align_numbered, is_goal=goal,
                          move=Move(BoardMove.DOWN, numbered_block, (y, x), placed_blocks, used_blocks))
 
-    # Gets all the operators from the current board state
     @staticmethod
     def get_all_operators(self):
+        """" Gets all the operators from the current board state
+        :param self: current ZhedBoard
+        """
         operators = []
         for i in self.numbered:
             if i[1] > 0:
@@ -175,9 +193,12 @@ class ZhedBoard:
                 operators.append(self.up(i))
         return operators
 
-    # Gets all the operators from the current board state
     @staticmethod
     def get_all_expandables(self, coords):
+        """" Gets all the expandable blocks from a given ZhedBoard
+        :param self: current ZhedBoard
+        :param coords: tuple with coordinates to a given numbered block
+        """
         placed = []
 
         if coords[1] > 0:
@@ -193,33 +214,31 @@ class ZhedBoard:
 
     @staticmethod
     def manhattan(self, other):
+        """" Calculate the manhattan distance between two blocks
+        :param self: tuple with coordinates
+        :param other: tuple with other coordinates
+        """
         return abs(self[0] - other[0]) + abs(self[1] - other[1])
 
     def heuristics(self):
+        # Calculate the heuristics value for the current ZhedBoard
         value = 0
         nearest_goal = self.get_nearest(self.move.starting_block, self.goals)
-        nearest_dist = hs.nearest_dist(self,)
+        nearest_dist = hs.nearest_dist(self, )
         goal_dist = hs.nearest_goal(self, nearest_goal)
         value += hs.in_direction_of_goal(self)
         value += hs.punish_bad_expansions(self, nearest_goal)
-        value += hs.benefit_outered_blocks(self, nearest_goal)
+        value += hs.benefit_outer_blocks(self, nearest_goal)
         return value + goal_dist + nearest_dist
 
     def get_nearest(self, coordinates, coordinates_list):
+        # Get the nearest coordinate from a list of coordinates
         return reduce(
             lambda curr, nxt: curr if self.manhattan(curr, coordinates) <
                                       self.manhattan(nxt, coordinates) else nxt, coordinates_list)
 
-    def is_the_same_quadrant(self):
-        nearest_goal = self.get_nearest(self.move.starting_block, self.goals)
-        x_quadrant = len(self.board_state[0]) / 2
-        y_quadrant = len(self.board_state) / 2
-        goal_quadrant = (math.ceil(nearest_goal[0] / y_quadrant), math.ceil(nearest_goal[1] / x_quadrant))
-        finish_quadrant = (math.ceil(self.move.finish_block[0] / y_quadrant),
-                           math.ceil(self.move.finish_block[1] / x_quadrant))
-        return goal_quadrant == finish_quadrant
-
     def cost(self):
+        # Calculate the cost on the given cost
         if self.is_goal:
             return -sys.maxsize
 
