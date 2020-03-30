@@ -5,23 +5,6 @@ from datetime import datetime
 from heuristics import heuristics
 import sys
 
-
-def get_boards_list(main_node):
-    boards = []
-    node = main_node
-
-    while True:
-        boards.append(node.state.board_state)
-        if node.parent == None:
-            break
-        else:
-            node = node.parent
-
-    boards.reverse()
-
-    return boards
-
-
 def run_puzzle(puzzle):
     game_board = ZhedBoard.build_from_file(puzzle)
     graph = Graph(lambda node: node.is_goal, lambda node: ZhedBoard.get_all_operators(node.state))

@@ -1,5 +1,6 @@
 import pygame
 import zhed_board
+from graph.graph import Graph
 from run import run_puzzle
 import puzzle_reader
 import random
@@ -22,6 +23,7 @@ class GameColors:
 
     COMPLETED = (33, 182, 168)
     COMPLETED_TEXT = (163, 235, 177)
+    HINT = (255, 244, 79)
 
     BACKGROUND = (97, 200, 188)
 
@@ -32,6 +34,16 @@ class BoardSettings:
     def __init__(self, window, font):
         self.window = window
         self.font = font
+
+
+class Hint:
+    NO_HINT = -1
+    HINT = -2
+
+    def __init__(self, hint, path, block=None):
+        self.path = path
+        self.hint = hint
+        self.block = block
 
 
 class Tile(pygame.sprite.Sprite):
@@ -54,7 +66,7 @@ class Tile(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
 
 
-def draw_board(settings, board, side, index, last, expandables=[]):
+def draw_board(settings, board, side, index, last, expandables=[], hints=Hint(Hint.NO_HINT, [])):
     sprites = pygame.sprite.Group()
     interactable_sprites = []
 
@@ -86,15 +98,24 @@ def draw_board(settings, board, side, index, last, expandables=[]):
 
     for expandable in expandables:
         for tile in expandable:
-            empty_color = GameColors.empty_color()
-            x_pos = tile[1] * size + 10
-            y_pos = tile[0] * size + 10
-            sprites.add(Tile(settings.font, '∙', GameColors.COMPLETED, settings.window,
-                            empty_color, x_pos, y_pos))
+            build_tile(settings, sprites, tile, GameColors.COMPLETED, GameColors.empty_color(), '∙')
+
+    if hints.hint is Hint.HINT:
+        for hint in hints.path:
+            build_tile(settings, sprites, hint, GameColors.HINT, GameColors.empty_color(), '∙')
+            build_tile(settings, sprites, hints.block, GameColors.TILE_TEXT,
+                       GameColors.HINT, str(board[hints.block[0]][hints.block[1]]))
 
     sprites.draw(settings.window)
 
     return interactable_sprites
+
+
+def build_tile(settings, sprites, tile, foreground_color, background_color, symbol):
+    x_pos = tile[1] * size + 10
+    y_pos = tile[0] * size + 10
+    sprites.add(Tile(settings.font, symbol, foreground_color, settings.window,
+                     background_color, x_pos, y_pos))
 
 
 def bot_playing(puzzle):
@@ -156,6 +177,14 @@ def process_mouse(board, interactable, pos):
     return expandables, clicked_pos
 
 
+def get_hint(board_state, hints):
+    graph = Graph(lambda node: node.is_goal, lambda node: zhed_board.ZhedBoard.get_all_operators(node.state))
+    moves = puzzle_reader.get_boards_list(graph.a_star(board_state))
+    if len(moves) > 1:
+        hints.path.extend(moves[1].move.placed_blocks)
+        hints.block = moves[1].move.starting_block
+        hints.hint = Hint.HINT
+
 def player_playing(puzzle):
     pygame.init()
     pygame.display.set_caption("Zhed")
@@ -178,12 +207,14 @@ def player_playing(puzzle):
     expandables = []
     clicked_pos = None
     interactable = []
+    hints = Hint(Hint.NO_HINT, [])
 
     while run:
         pygame.time.delay(50)
 
         if key_press or counter == 0:
-            interactable = draw_board(settings, board_state.board_state, side, index, False, expandables=expandables)
+            interactable = draw_board(settings, board_state.board_state, side, index, False, expandables=expandables,
+                                      hints=hints)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -195,6 +226,8 @@ def player_playing(puzzle):
 
                 if event.key == pygame.K_r:
                     board_state = initial_board_state
+                elif event.key == pygame.K_SPACE:
+                    get_hint(board_state, hints)
 
                 if clicked_pos != None:
                     if event.key == pygame.K_UP:
@@ -221,4 +254,4 @@ def player_playing(puzzle):
     pygame.quit()
 
 
-player_playing(16)
+player_playing(5)
