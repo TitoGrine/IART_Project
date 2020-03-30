@@ -163,6 +163,7 @@ def player_playing(puzzle):
     font = pygame.font.SysFont('Arial', 37, 0, 0)
     level = puzzle_reader.padd_raw_board(puzzle_reader.read_file(puzzle))
     board_state = zhed_board.ZhedBoard.build_from_file(level)
+    initial_board_state = board_state
 
     side = len(board_state.board_state)
 
@@ -191,6 +192,10 @@ def player_playing(puzzle):
                 expandables, clicked_pos = process_mouse(board_state, interactable, pygame.mouse.get_pos())
             elif event.type == pygame.KEYDOWN:
                 key_press = True
+
+                if event.key == pygame.K_r:
+                    board_state = initial_board_state
+
                 if clicked_pos != None:
                     if event.key == pygame.K_UP:
                         board_state = board_state.up(clicked_pos)
@@ -205,6 +210,10 @@ def player_playing(puzzle):
                     expandables = []
             else:
                 key_press = False
+
+        if board_state.is_goal:
+            pygame.time.delay(50)
+            run = False
 
         counter = (counter + 1) % 5
         pygame.display.update()
