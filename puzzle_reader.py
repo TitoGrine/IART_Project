@@ -59,3 +59,18 @@ def padd_raw_board(board):
         padded_board.append(row)
 
     return padded_board
+
+def get_boards_list(main_node):
+    boards = []
+    node = main_node
+
+    while True:
+        boards.append(node.state)
+        if node.parent == None:
+            break
+        else:
+            node = node.parent
+
+    boards.reverse()
+
+    return boards

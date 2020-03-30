@@ -1,12 +1,9 @@
-from dataclasses import dataclass
-from enum import Enum
+import math
 import sys
 from copy import deepcopy
 from functools import reduce
-import math
+
 import heuristics as hs
-
-
 # Class to save state of Zhed Board
 from zhed.model import *
 
