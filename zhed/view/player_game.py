@@ -11,6 +11,11 @@ import zhed.view.menus
 
 
 def process_mouse(board, interactable, pos):
+    """" Determines if any of the game's interactable tiles where clicked and if so, returns their possible expansion tiles and the coordinates fo the clicked tile
+    :param board: ZhedBoard objetc containing all relevant information about the board
+    :param interactable: list of Sprites that are interactable
+    :param pos: mouse position at the moment when there was a click
+    """
     clicked_sprites = [s for s in interactable if s.tile.collidepoint(pos)]
     clicked_pos = None
     expandables = []
@@ -23,6 +28,10 @@ def process_mouse(board, interactable, pos):
     return expandables, clicked_pos
 
 def get_hint(board_state, hints):
+    """" Calculates the best possible move given the current state of the board
+    :param hints: an instance of a Hint
+    """
+
     graph = Graph(lambda node: node.is_goal, lambda node: zhed_board.ZhedBoard.get_all_operators(node.state))
     moves = puzzle_reader.get_boards_list(graph.a_star(board_state))
     if moves is None or len(moves) > 1:
@@ -34,6 +43,11 @@ def get_hint(board_state, hints):
 
 
 def player_playing(puzzle):
+    """" Displays the puzzle an lets the player interact with it. The player can choose one of the numbered tiles
+         using the mouse and then expand it in on of the four directions by pressing the arrow keys. in order to
+         get a hint the player must press the space bar. To restart the player must press the "R" key.
+    :param puzzle: the puzzle number
+    """
     pygame.init()
     pygame.display.set_caption("Zhed")
 
@@ -47,7 +61,6 @@ def player_playing(puzzle):
     window = pygame.display.set_mode((side * size + 20, side * size + 20))
     window.fill(GameColors.BACKGROUND)
     run = True
-    index = 0
     counter = 0
     key_press = True
 
@@ -61,7 +74,7 @@ def player_playing(puzzle):
         pygame.time.delay(50)
 
         if key_press or counter == 0:
-            interactable = draw_board(settings, board_state.board_state, side, index, False, expandables=expandables,
+            interactable = draw_board(settings, board_state.board_state, side, expandables=expandables,
                                       hints=hints)
 
         for event in pygame.event.get():
@@ -110,6 +123,9 @@ def player_playing(puzzle):
 
 
 def victory_screen():
+    """" Displays a victory screen for a few seconds.
+    """
+
     pygame.init()
     pygame.display.set_caption("Zhed")
 
@@ -118,7 +134,7 @@ def victory_screen():
 
     window.fill(GameColors.BACKGROUND)
 
-    title = Title("CONGRATS!", GameColors.HINT_TEXT, 90)
+    title = Title("CONGRATS!", GameColors.GOAL, 90)
     subtitle = Title("⋆", GameColors.HINT, 100, 0)
     settings = BoardSettings(window, font)
 
@@ -127,7 +143,7 @@ def victory_screen():
     while counter < 18:
         counter += 1
 
-        zhed.view.menus.draw_menu(settings)
+        zhed.view.menus.draw_background(settings)
 
         title.draw(window, 0, 0, size * 8 + 20, size * 7 + 20)
         subtitle.draw(window, 0, 0, size * 8 + 20, size * 10 + 20)

@@ -3,11 +3,11 @@ from copy import deepcopy
 from functools import reduce
 
 from zhed.controller import heuristics as hs
-# Class to save state of Zhed Board
 from zhed.model.game_state import *
 
 
 class ZhedBoard:
+    # Class to save state of Zhed Board
     types = {
         ".": BoardState.EMPTY,
         "X": BoardState.GOAL

@@ -9,6 +9,12 @@ from zhed.view.game_pieces import size
 
 
 def bot_playing(puzzle):
+    """" Runs an A* algorithm to solve the puzzle and the displays the board to the user. 
+         The user can navigate the moves with the left and right arrow key.
+         To go back to the main menu press ESC.
+    :param puzzle: The puzzle number
+    """
+
     pygame.init()
     pygame.display.set_caption("Zhed")
 
@@ -37,7 +43,7 @@ def bot_playing(puzzle):
         board = boards[index]
 
         if key_press or counter == 0:
-            draw_board(settings, board, side, index, index == len(boards) - 1)
+            draw_board(settings, board, side, last=(index == len(boards) - 1))
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
