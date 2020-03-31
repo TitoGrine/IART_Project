@@ -1,4 +1,4 @@
-import zhed_board
+from zhed.controller import zhed_board
 
 
 def get_puzzle(number):

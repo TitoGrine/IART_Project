@@ -1,4 +1,4 @@
-from zhed.model import *
+from zhed.model.game_state import *
 
 heuristics = {
     "all_heuristics": lambda board, goal: nearest_dist(board) + nearest_goal(board, goal) + in_direction_of_goal(

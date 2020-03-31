@@ -1,11 +1,10 @@
-import math
 import sys
 from copy import deepcopy
 from functools import reduce
 
-import heuristics as hs
+from zhed.controller import heuristics as hs
 # Class to save state of Zhed Board
-from zhed.model import *
+from zhed.model.game_state import *
 
 
 class ZhedBoard:
@@ -33,7 +32,8 @@ class ZhedBoard:
         self.move = move
         if move is not None:
             goal = self.get_nearest(self.move.starting_block, self.goals)
-            self.heuristics_value = self.heuristics_function(goal)
+            self.heuristics_value = self.heuristics_function(
+                goal) if self.heuristics_function is not None else self.heuristics()
             self.cost_value = self.cost()
 
     @staticmethod
