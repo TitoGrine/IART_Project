@@ -24,7 +24,9 @@ class GameColors:
 
     COMPLETED = (33, 182, 168)
     COMPLETED_TEXT = (163, 235, 177)
-    HINT = (255, 244, 79)
+    
+    HINT = (245,251,65)
+    HINT_TEXT = (36,98,13)
 
     BACKGROUND = (97, 200, 188)
 
@@ -70,8 +72,8 @@ class Tile(pygame.sprite.Sprite):
 class Title:
     text_display: pygame.Surface
 
-    def __init__(self, text, text_color, size):
-        font = pygame.font.SysFont('Hack', size, 1, 0)
+    def __init__(self, text, text_color, size, bold=1):
+        font = pygame.font.SysFont('Hack', size, bold, 0)
 
         self.text_display = font.render(text, True, text_color)
 
@@ -180,7 +182,7 @@ def draw_board(settings, board, side, index, last, expandables=[], hints=Hint(Hi
     if hints.hint is Hint.HINT:
         for hint in hints.path:
             build_tile(settings, sprites, hint, GameColors.HINT, GameColors.empty_color(), '∙')
-            build_tile(settings, sprites, hints.block, GameColors.TILE_TEXT,
+            build_tile(settings, sprites, hints.block, GameColors.HINT_TEXT,
                        GameColors.HINT, str(board[hints.block[0]][hints.block[1]]))
 
     sprites.draw(settings.window)
@@ -232,7 +234,7 @@ def level_menu(game_mode):
 
     value = ""
 
-    title = Title("CHOOSE LEVEL", GameColors.TILE, 70)
+    title = Title("CHOOSE LEVEL", GameColors.TILE, 60)
     settings = BoardSettings(window, font)
     buttons = []
     run = True
@@ -246,7 +248,7 @@ def level_menu(game_mode):
 
         title.draw(window, 0, 0, size * 8 + 20, size * 3.5 + 10)
 
-        TextField(font, "Level: " + value, GameColors.TILE_TEXT,
+        TextField(font, "Level:  " + value, GameColors.TILE_TEXT,
                   settings.window, GameColors.TILE, size * 6, round(size * 1.5), size + 10, round(size * 3.5) + 10)
 
         buttons.clear()
@@ -309,7 +311,7 @@ def mode_menu():
 
     window.fill(GameColors.BACKGROUND)
 
-    title = Title("CHOOSE MODE", GameColors.TILE, 70)
+    title = Title("CHOOSE MODE", GameColors.TILE, 60)
     settings = BoardSettings(window, font)
     buttons = []
     run = True
@@ -354,7 +356,7 @@ def main_menu():
 
     window.fill(GameColors.BACKGROUND)
 
-    title = Title("ZHED", GameColors.TILE, 120)
+    title = Title("ZHED", GameColors.TILE, 110)
     settings = BoardSettings(window, font)
     buttons = []
     run = True
@@ -524,7 +526,8 @@ def player_playing(puzzle):
 
         if board_state.is_goal:
             pygame.time.delay(50)
-            run = False
+            victory_screen()
+            main_menu()
 
         counter = (counter + 1) % 5
         # if pygame.display.
@@ -532,5 +535,33 @@ def player_playing(puzzle):
 
     main_menu()
 
+
+def victory_screen():
+    pygame.init()
+    pygame.display.set_caption("Zhed")
+
+    font = pygame.font.SysFont('Arial', 30, 1, 0)
+    window = pygame.display.set_mode((size * 8 + 20, size * 8 + 20))
+
+    window.fill(GameColors.BACKGROUND)
+
+    title = Title("CONGRATS!", GameColors.HINT_TEXT, 90)
+    subtitle = Title("⋆", GameColors.HINT, 100, 0)
+    settings = BoardSettings(window, font)
+
+    counter = 0
+
+    while counter < 18:
+        counter += 1
+
+        draw_menu(settings)
+
+        title.draw(window, 0, 0, size * 8 + 20, size * 7 + 20)
+        subtitle.draw(window, 0, 0, size * 8 + 20, size * 10 + 20)
+
+        pygame.display.update()
+        pygame.time.delay(200)
+
+    pygame.quit()
 
 main_menu()
