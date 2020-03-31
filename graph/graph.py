@@ -47,7 +47,6 @@ class Graph:
             # Dequeue a vertex from
             # queue and print it
             if len(queue) == 0:
-                print("Didn't find a solution! Stopping...")
                 break
 
             s = queue.pop(0)
@@ -64,7 +63,6 @@ class Graph:
                 elif not visited[i]:
                     function(i, queue, visited, n)
             n += 1
-        print(n, end=",")
         return solution
 
     def __shortest_path(self, s, function):
@@ -88,7 +86,6 @@ class Graph:
             # Dequeue a vertex from
             # queue and print it
             if len(queue.queue) == 0:
-                print("\nDidn't find a solution! Stopping...")
                 break
 
             s = queue.get()
@@ -102,7 +99,7 @@ class Graph:
                 else:
                     function(i, s, queue)
             n += 1
-        print(n, end=",")
+        print("Nodes expanded: " + str(n))
         return solution
 
     @staticmethod

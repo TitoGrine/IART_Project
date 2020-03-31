@@ -6,6 +6,9 @@ from zhed.view.player_game import player_playing
 
 
 def mode_menu():
+    """" Displays a menu with two buttons allowing the player to choose between player mode (player attempts to solve the puzzle)
+         or bot mode (the bot will calculate the solution for the player to analyse)
+    """
     pygame.init()
     pygame.display.set_caption("Zhed")
 
@@ -24,7 +27,7 @@ def mode_menu():
         pygame.time.delay(50)
 
         if counter == 0:
-            zhed.view.menus.draw_menu(settings)
+            zhed.view.menus.draw_background(settings)
 
         title.draw(window, 0, 0, size * 8 + 20, size * 3.5 + 10)
 
@@ -39,7 +42,7 @@ def mode_menu():
         zhed.view.menus.draw_buttons(settings, buttons)
 
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+            if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                 run = False
             elif event.type == pygame.MOUSEBUTTONUP:
                 zhed.view.menus.check_button_clicks(buttons, pygame.mouse.get_pos())

@@ -26,14 +26,16 @@ algorithms = {
 
 def run_puzzle(num, algorithm_type):
     puzzle = read_file(num)
-    print(num, end=",")
+    print("Puzzle: " + str(num))
+    print("Algorithm: " + algorithm_type)
     game_board = ZhedBoard.build_from_file(puzzle)
     start_timestamp = datetime.now()
     graph = Graph(lambda node: node.is_goal, lambda node: ZhedBoard.get_all_operators(node.state))
     node = algorithms[algorithm_type](graph, game_board)
     end_timestamp = datetime.now()
     elapsed_time = end_timestamp - start_timestamp
-    print(elapsed_time.microseconds)
+    print("Elapsed time: " + str(elapsed_time))
+    print("\n\nSolution: " + ("Not found..." if node is None else "Found!"))
     return node
 
 

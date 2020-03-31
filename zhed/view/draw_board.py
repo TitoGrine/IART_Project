@@ -4,13 +4,31 @@ from zhed.view.game_pieces import *
 
 
 def build_tile(settings, sprites, tile, foreground_color, background_color, symbol):
+    """" Builds a tile object with the correct screen coordenates for display.
+    :param settings: class information about the pygame screen and font
+    :param sprites: list with all current game sprites
+    :param tile: tile coordinates in the puzzle "array"
+    :param foreground_color: rgb tuple for the foreground color
+    :param background_color: rgb tuple for the background color
+    :param symbol: character meant to represent the tile
+    """
+
     x_pos = tile[1] * size + 10
     y_pos = tile[0] * size + 10
     sprites.add(Tile(settings.font, symbol, foreground_color, settings.window,
                      background_color, x_pos, y_pos))
 
 
-def draw_board(settings, board, side, index, last, expandables=[], hints=Hint(Hint.NO_HINT, [])):
+def draw_board(settings, board, side, last=False, expandables=[], hints=Hint(Hint.NO_HINT, [])):
+    """" Draws all board tiles and returns the sprites that are interactable in the game.
+    :param settings: class information about the pygame screen and font
+    :param board: list of lists cointaining each tile info (int)
+    :param side: length of the board's side in number of tiles
+    :param last: boolean stating if it's the last solution state (used only in bot_playing)
+    :param expandables: list of tiles that can be filled if the user expands the block previously selected (used only in player_playing)
+    :param hints: Hint object for signalying the best current play
+    """
+
     sprites = pygame.sprite.Group()
     interactable_sprites = []
 
