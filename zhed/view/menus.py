@@ -4,6 +4,10 @@ from zhed.view.mode_menu import mode_menu
 
 
 def draw_buttons(settings, button_objs):
+    """" Draws on the screen all the button objects and their border
+    :param settings: class information about the pygame screen and font
+    :param button_objs: list of Button objetcs to be dysplayed
+    """
     buttons = pygame.sprite.Group()
 
     for button in button_objs:
@@ -14,6 +18,10 @@ def draw_buttons(settings, button_objs):
 
 
 def level_menu(game_mode):
+    """" Displays the menu where the user can input (using the keyboard) the level number it wants to play
+    :param game_mode: function to be called once a valid level is given, representing the game mode previously selected.
+    """
+
     pygame.init()
     pygame.display.set_caption("Zhed")
 
@@ -34,7 +42,7 @@ def level_menu(game_mode):
         pygame.time.delay(50)
 
         if counter == 0:
-            draw_menu(settings)
+            draw_background(settings)
 
         title.draw(window, 0, 0, size * 8 + 20, size * 3.5 + 10)
 
@@ -80,6 +88,8 @@ def level_menu(game_mode):
                 if len(value) > 0:
                     if event.key == pygame.K_DELETE or event.key == pygame.K_BACKSPACE:
                         value = value[:-1]
+                    elif event.key == pygame.K_ESCAPE:
+                        run = False
 
         counter = (counter + 1) % 5
         try:
@@ -91,6 +101,11 @@ def level_menu(game_mode):
 
 
 def check_button_clicks(buttons, pos, condition=True):
+    """" Checks if any buttons where clicked and if accepted, it triggers them.
+    :param buttons: list of all Buttons objects that can be clicked
+    :param pos: mouse position at the moment when there was a click
+    :param condition: boolean stating if button clicks are supposed to be allowed (i.e. if it should trigger them)
+    """
     clicked_buttons = [s for s in buttons if s.tile.collidepoint(pos)]
 
     if len(clicked_buttons) != 0 and condition:
@@ -98,6 +113,9 @@ def check_button_clicks(buttons, pos, condition=True):
 
 
 def main_menu():
+    """" Displays the game's main menu
+    """
+
     pygame.init()
     pygame.display.set_caption("Zhed")
 
@@ -116,7 +134,7 @@ def main_menu():
         pygame.time.delay(50)
 
         if counter == 0:
-            draw_menu(settings)
+            draw_background(settings)
 
         title.draw(window, 0, 0, size * 8 + 20, size * 3.5 + 10)
 
@@ -131,7 +149,7 @@ def main_menu():
         draw_buttons(settings, buttons)
 
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+            if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
                 run = False
             elif event.type == pygame.MOUSEBUTTONUP:
                 check_button_clicks(buttons, pygame.mouse.get_pos())
@@ -145,7 +163,11 @@ def main_menu():
     pygame.quit()
 
 
-def draw_menu(settings):
+def draw_background(settings):
+    """" Draws a dynamic tile background for the menu's background
+    :param settings: class information about the pygame screen and font
+    """
+
     sprites = pygame.sprite.Group()
 
     side_y = round((settings.window.get_width() - 20) / size)
