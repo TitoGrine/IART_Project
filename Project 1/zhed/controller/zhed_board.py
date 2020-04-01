@@ -1,7 +1,6 @@
 import sys
 from copy import deepcopy
 from functools import reduce
-
 from zhed.controller import heuristics as hs
 from zhed.model.game_state import *
 
