@@ -1,28 +1,13 @@
-from zhed_board import ZhedBoard
-from graph.graph import Graph
-from puzzle_reader import read_file
-from datetime import datetime
-from heuristics import heuristics
 import sys
+from datetime import datetime
+
+from graph.graph import Graph
+from zhed.controller.heuristics import heuristics
+from zhed.controller.puzzle_reader import read_file, get_boards_list
+from zhed.controller.zhed_board import ZhedBoard
 
 
-def get_boards_list(main_node):
-    boards = []
-    node = main_node
-
-    while True:
-        boards.append(node.state.board_state)
-        if node.parent == None:
-            break
-        else:
-            node = node.parent
-
-    boards.reverse()
-
-    return boards
-
-
-def run_puzzle(puzzle):
+def solve_puzzle(puzzle):
     game_board = ZhedBoard.build_from_file(puzzle)
     graph = Graph(lambda node: node.is_goal, lambda node: ZhedBoard.get_all_operators(node.state))
     node = graph.a_star(game_board)
@@ -41,14 +26,16 @@ algorithms = {
 
 def run_puzzle(num, algorithm_type):
     puzzle = read_file(num)
-    print(num, end=",")
+    print("\nPuzzle: " + str(num))
+    print("Algorithm: " + algorithm_type)
     game_board = ZhedBoard.build_from_file(puzzle)
     start_timestamp = datetime.now()
     graph = Graph(lambda node: node.is_goal, lambda node: ZhedBoard.get_all_operators(node.state))
     node = algorithms[algorithm_type](graph, game_board)
     end_timestamp = datetime.now()
     elapsed_time = end_timestamp - start_timestamp
-    print(elapsed_time.microseconds)
+    print("Elapsed time: " + str(elapsed_time))
+    print("\nSolution: " + ("Not found..." if node is None else "Found!") + "\n")
     return node
 
 
@@ -59,6 +46,3 @@ def run_statistics(puzzles):
         ZhedBoard.heuristics_function = heuristic
         for i in puzzles:
             run_puzzle(i, "a_star")
-
-
-run_statistics([1, 2, 3, 4])
