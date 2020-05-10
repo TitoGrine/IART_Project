@@ -14,7 +14,7 @@ class Tokenizer(BaseEstimator, TransformerMixin):
     def inverse_transform(self, X):
         return [" ".join(doc) for doc in X]
 
-    def transform(self, text):
+    def transform(self, tweet):
         tweetTokenizer = TweetTokenizer(preserve_case=self.preserve_case, reduce_len=self.reduce_len, strip_handles=self.strip_handles)
         
-        return tweetTokenizer.tokenize(text)
+        return tweetTokenizer.tokenize(tweet)
