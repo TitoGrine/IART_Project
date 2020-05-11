@@ -21,5 +21,5 @@ class Misspelling(BaseEstimator, TransformerMixin):
         sym_spell.load_dictionary(dictionary_path, term_index=0, count_index=1)
 
         for token in tweet:
-            suggestions = sym_spell.lookup(text, Verbosity.CLOSEST, max_edit_distance=2, include_unknown=True)
+            suggestions = sym_spell.lookup(text, Verbosity.CLOSEST, max_edit_distance=2, include_unknown=True, transfer_casing=True)
             token = suggestions[0].term
