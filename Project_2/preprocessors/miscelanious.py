@@ -12,19 +12,19 @@ class Miscelanious(BaseEstimator, TransformerMixin):
 
     def apply_regex(token): #Aggregate all regex first an only then apply to token?
         if self.single_letter:
-            token = ' '.join(re.sub("[a-zA-Z]", "", token).split())
+            token = ' '.join(sub("\b[a-zA-Z]\b", "", token).split())
 
         if self.numbers:
-            token = ' '.join(re.sub("[0-9]+\.?[0-9]+", "", token).split())
-
-        if self.punctuation:
-            token = ' '.join(re.sub("[\.\,\!\?\:\;\-\=\+]", "", token).split())
+            token = ' '.join(sub("[0-9]+\.?[0-9]+", "", token).split())
 
         if self.URLs:
-            token = ' '.join(re.sub("(\w+:\/\/\S+)", "", token).split())
+            token = ' '.join(sub("(\w+:\/\/\S+)", "", token).split())
+
+        if self.punctuation:
+            token = ' '.join(sub("[\.\,\!\?\:\;\-\=\+]", "", token).split())
 
         if self.hashtag:
-            token = ' '.join(re.sub("#", "", token).split()) #Juntar com a punctuation?
+            token = ' '.join(sub("#", "", token).split()) #Juntar com a punctuation?
         
     def fit(self, X, y=None):
         return self
