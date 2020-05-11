@@ -1,7 +1,7 @@
 from re import sub
 from sklearn.base import BaseEstimator, TransformerMixin
 
-class Miscelanious(BaseEstimator, TransformerMixin):
+class Miscellaneous(BaseEstimator, TransformerMixin):
 
     def __init__(self, single_letters=True, numbers=True, punctuation=True, URLs=True, hashtag=True):
         self.single_letter = single_letters
