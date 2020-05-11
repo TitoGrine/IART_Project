@@ -9,7 +9,7 @@ class Emojis(BaseEstimator, TransformerMixin):
 
     def create_dictionary():
         emoticons = {}
-        with open("preprocessors/emoticons.txt") as file: #TODO: Provavelmente terá de se tirar 'preprocessors/'
+        with open("preprocessors/emoticons.txt") as file: #TODO: Poderá ter de se tirar 'preprocessors/'
             for line in file:
                 (key, val) = line.split()
                 emoticons[key] = val
@@ -25,7 +25,10 @@ class Emojis(BaseEstimator, TransformerMixin):
     def transform(self, tweet):
         for token in tweet:
             token = demojize(token, use_aliases=self.use_aliases)
+
             if token in self.emoticons
                 token = self.emoticons[token]
+
+            token = ' '.join(re.sub("[:]", " ", token).split())
         
         return tweet
