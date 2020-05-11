@@ -1,4 +1,5 @@
-from emoji import demojize 
+from emoji import demojize
+from re import sub
 from sklearn.base import BaseEstimator, TransformerMixin
 
 class Emojis(BaseEstimator, TransformerMixin):
@@ -26,9 +27,9 @@ class Emojis(BaseEstimator, TransformerMixin):
         for token in tweet:
             token = demojize(token, use_aliases=self.use_aliases)
 
-            if token in self.emoticons
+            if token in self.emoticons:
                 token = self.emoticons[token]
 
-            token = ' '.join(re.sub("[:]", " ", token).split())
+        token = ' '.join(sub("[:]", " ", token).split())
         
         return tweet
