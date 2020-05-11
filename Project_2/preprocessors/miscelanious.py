@@ -24,7 +24,7 @@ class Miscelanious(BaseEstimator, TransformerMixin):
             token = ' '.join(sub("[\.\,\!\?\:\;\-\=\+]", "", token).split())
 
         if self.hashtag:
-            token = ' '.join(sub("#", "", token).split()) #Juntar com a punctuation?
+            token = ' '.join(token.replace("#", "").split()) #Juntar com a punctuation?
         
     def fit(self, X, y=None):
         return self

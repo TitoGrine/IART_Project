@@ -30,6 +30,6 @@ class Emojis(BaseEstimator, TransformerMixin):
             if token in self.emoticons:
                 token = self.emoticons[token]
 
-        token = ' '.join(sub("[:]", " ", token).split())
+        token = ' '.join(token.replace(":", "").split())
         
         return tweet
