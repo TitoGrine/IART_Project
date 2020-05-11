@@ -1,4 +1,3 @@
-import nltk
 from nltk.stem.lancaster import LancasterStemmer
 from nltk.stem.porter import PorterStemmer
 from nltk.stem.snowball import EnglishStemmer
@@ -25,4 +24,4 @@ class Tokenizer(BaseEstimator, TransformerMixin):
         for token in tweet:
             token = self.stemmer.stem(token)
 
-        return token
+        return tweet
