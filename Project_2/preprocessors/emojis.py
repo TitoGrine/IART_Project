@@ -23,8 +23,8 @@ class Emojis(BaseEstimator, TransformerMixin):
     def inverse_transform(self, X):
         return [" ".join(doc) for doc in X]
 
-    def transform(self, tweet):
-        for token in tweet:
+    def transform(self, tweets):
+        for token in tweets:
             token = demojize(token, use_aliases=self.use_aliases)
 
             if token in self.emoticons:
@@ -32,4 +32,4 @@ class Emojis(BaseEstimator, TransformerMixin):
 
         token = ' '.join(token.replace(":", "").split())
         
-        return tweet
+        return tweets

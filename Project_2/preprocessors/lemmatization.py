@@ -14,8 +14,8 @@ class Tokenizer(BaseEstimator, TransformerMixin):
     def inverse_transform(self, X):
         return [" ".join(doc) for doc in X]
 
-    def transform(self, tweet):
-        for token in tweet:
+    def transform(self, tweets):
+        for token in tweets:
             token = self.lemmatizer.lemmatize(token)
 
-        return tweet
+        return tweets
