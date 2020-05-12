@@ -9,7 +9,7 @@ class Misspelling(BaseEstimator, TransformerMixin):
         self.prefix_length = prefix_length
         self.transfer_casing = transfer_casing
         self.sym_spell = SymSpell(max_edit_distance=self.max_edit_distance, prefix_length=self.prefix_length)
-        self.dictionary_path = pkg_resources.resource_filename("symspellpy", "frequency_dictionary_en_82_765.txt")
+        dictionary_path = pkg_resources.resource_filename("symspellpy", "frequency_dictionary_en_82_765.txt")
         self.sym_spell.load_dictionary(dictionary_path, term_index=0, count_index=1)
 
     def process(token):
