@@ -20,8 +20,5 @@ class Tokenizer(BaseEstimator, TransformerMixin):
     def inverse_transform(self, X):
         return [" ".join(doc) for doc in X]
 
-    def transform(self, tweets):
-        for token in tweets:
-            token = self.stemmer.stem(token)
-
-        return tweets
+    def transform(self, tweet):
+        return list(map(self.stemmer.stem, tweet))

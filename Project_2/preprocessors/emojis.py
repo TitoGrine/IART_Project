@@ -1,4 +1,4 @@
-from emoji import demojize
+from emoji import demojize<
 from re import sub
 from sklearn.base import BaseEstimator, TransformerMixin
 
@@ -17,19 +17,19 @@ class Emojis(BaseEstimator, TransformerMixin):
 
         self.emoticons = emoticons
 
+    def process(token):
+        token = demojize(token, use_aliases=self.use_aliases)
+
+        if token in self.emoticons:
+            token = self.emoticons[token]
+
+        return ' '.join(token.replace(":", "").split())
+
     def fit(self, X, y=None):
         return self
 
     def inverse_transform(self, X):
         return [" ".join(doc) for doc in X]
 
-    def transform(self, tweets):
-        for token in tweets:
-            token = demojize(token, use_aliases=self.use_aliases)
-
-            if token in self.emoticons:
-                token = self.emoticons[token]
-
-        token = ' '.join(token.replace(":", "").split())
-        
-        return tweets
+    def transform(self, tweet):
+        return list(map(self.process, tweet))

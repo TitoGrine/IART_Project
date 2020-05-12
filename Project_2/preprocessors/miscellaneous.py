@@ -3,11 +3,11 @@ from sklearn.base import BaseEstimator, TransformerMixin
 
 class Miscellaneous(BaseEstimator, TransformerMixin):
 
-    def __init__(self, single_letters=True, numbers=True, punctuation=True, URLs=True, hashtag=True):
+    def __init__(self, single_letters=True, numbers=True, punctuation=True, urls=True, hashtag=True):
         self.single_letter = single_letters
         self.numbers = numbers
         self.punctuation = punctuation
-        self.URLs = URLs
+        self.urls = urls
         self.hashtag = hashtag
 
     def apply_regex(token): #Aggregate all regex first an only then apply to token?
@@ -17,7 +17,7 @@ class Miscellaneous(BaseEstimator, TransformerMixin):
         if self.numbers:
             token = ' '.join(sub("[0-9]+\.?[0-9]+", "", token).split())
 
-        if self.URLs:
+        if self.urls:
             token = ' '.join(sub("(\w+:\/\/\S+)", "", token).split())
 
         if self.punctuation:
@@ -25,6 +25,8 @@ class Miscellaneous(BaseEstimator, TransformerMixin):
 
         if self.hashtag:
             token = ' '.join(token.replace("#", "").split()) #Juntar com a punctuation?
+
+        return token
         
     def fit(self, X, y=None):
         return self
@@ -32,10 +34,8 @@ class Miscellaneous(BaseEstimator, TransformerMixin):
     def inverse_transform(self, X):
         return [" ".join(doc) for doc in X]
 
-    def transform(self, tweets):
-        for token in tweets:
-            self.apply_regex(token)
+    def transform(self, tweet):
+        processed_tweet = list(map(self.apply_regex, tweet))
+        processed_tweet.remove("")
 
-        tweets.remove("")
-
-        return tweets        
+        return processed_tweet        
