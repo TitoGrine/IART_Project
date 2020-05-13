@@ -1,5 +1,4 @@
-from emoji import demojize<
-from re import sub
+from emoji import demojize
 from sklearn.base import BaseEstimator, TransformerMixin
 
 class Emojis(BaseEstimator, TransformerMixin):
@@ -8,7 +7,7 @@ class Emojis(BaseEstimator, TransformerMixin):
         self.use_aliases = use_aliases
         self.create_dictionary()
 
-    def create_dictionary():
+    def create_dictionary(self):
         emoticons = {}
         with open("preprocessors/emoticons.txt") as file: 
             for line in file:

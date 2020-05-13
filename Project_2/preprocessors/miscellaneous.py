@@ -3,7 +3,8 @@ from sklearn.base import BaseEstimator, TransformerMixin
 
 class Miscellaneous(BaseEstimator, TransformerMixin):
 
-    def __init__(self, single_letters=True, numbers=True, punctuation=True, urls=True, hashtag=True):
+    def __init__(self, single_letters=True, numbers=True, punctuation=True, urls=True, hashtag=True, lower_case=True):
+        self.lower_case = lower_case
         self.single_letter = single_letters
         self.numbers = numbers
         self.punctuation = punctuation
