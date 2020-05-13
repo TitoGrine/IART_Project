@@ -39,6 +39,6 @@ class Miscellaneous(BaseEstimator, TransformerMixin):
 
     def transform(self, tweet):
         processed_tweet = list(map(lambda token: self.apply_regex(token), tweet))
-        processed_tweet.remove("")
+        processed_tweet = list(filter(lambda token: (token != ""), processed_tweet))
 
         return processed_tweet        
