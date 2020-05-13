@@ -12,7 +12,7 @@ class Misspelling(BaseEstimator, TransformerMixin):
         dictionary_path = pkg_resources.resource_filename("symspellpy", "frequency_dictionary_en_82_765.txt")
         self.sym_spell.load_dictionary(dictionary_path, term_index=0, count_index=1)
 
-    def process(token):
+    def process(self, token):
         suggestions = self.sym_spell.lookup(text, Verbosity.CLOSEST, max_edit_distance=2, include_unknown=True, transfer_casing=True)
         return suggestions[0].term
 
@@ -23,4 +23,4 @@ class Misspelling(BaseEstimator, TransformerMixin):
         return [" ".join(doc) for doc in X]
 
     def transform(self, tweet):
-        return list(map(self.process, tweet))
+        return list(map(lambda token: self.process(token), tweet))

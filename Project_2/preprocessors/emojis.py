@@ -17,7 +17,7 @@ class Emojis(BaseEstimator, TransformerMixin):
 
         self.emoticons = emoticons
 
-    def process(token):
+    def process(self, token):
         token = demojize(token, use_aliases=self.use_aliases)
 
         if token in self.emoticons:
@@ -32,4 +32,4 @@ class Emojis(BaseEstimator, TransformerMixin):
         return [" ".join(doc) for doc in X]
 
     def transform(self, tweet):
-        return list(map(self.process, tweet))
+        return list(map(lambda token: self.process(token), tweet))
