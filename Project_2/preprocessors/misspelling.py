@@ -2,6 +2,7 @@ import pkg_resources
 from symspellpy import SymSpell, Verbosity
 from sklearn.base import BaseEstimator, TransformerMixin
 
+
 class Misspelling(BaseEstimator, TransformerMixin):
 
     def __init__(self, max_edit_distance=3, prefix_length=5, transfer_casing=True):
@@ -13,7 +14,8 @@ class Misspelling(BaseEstimator, TransformerMixin):
         self.sym_spell.load_dictionary(dictionary_path, term_index=0, count_index=1)
 
     def process(self, token):
-        suggestions = self.sym_spell.lookup(token, Verbosity.CLOSEST, max_edit_distance=2, include_unknown=True, transfer_casing=True)
+        suggestions = self.sym_spell.lookup(token, Verbosity.CLOSEST, max_edit_distance=2, include_unknown=True,
+                                            transfer_casing=True)
         return suggestions[0].term
 
     def fit(self, X, y=None):
@@ -22,5 +24,8 @@ class Misspelling(BaseEstimator, TransformerMixin):
     def inverse_transform(self, X):
         return [" ".join(doc) for doc in X]
 
-    def transform(self, tweet):
+    def process_tweet(self, tweet):
         return list(map(lambda token: self.process(token), tweet))
+
+    def transform(self, tweets):
+        return map(self.process_tweet, tweets)

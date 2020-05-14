@@ -28,8 +28,9 @@ class CNN(BaseEstimator):
 
         model.add(Dense(self.units))
 
-        model.add(Dense(7))
+        model.add(Dense(1))
         model.add(Activation(self.activation_end))
 
-        model.compile(loss=self.loss_function, optimizer='accuracy')
+        model.compile(loss=self.loss_function, optimizer='adam')
         model.fit(x, y, batch_size=32, epochs=3)
+        return model

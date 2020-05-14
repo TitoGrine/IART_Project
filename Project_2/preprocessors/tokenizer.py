@@ -1,5 +1,6 @@
-from nltk.tokenize import TweetTokenizer 
+from nltk.tokenize import TweetTokenizer
 from sklearn.base import BaseEstimator, TransformerMixin
+
 
 class Tokenizer(BaseEstimator, TransformerMixin):
 
@@ -15,6 +16,7 @@ class Tokenizer(BaseEstimator, TransformerMixin):
         return [" ".join(doc) for doc in X]
 
     def transform(self, tweets):
-        tweetTokenizer = TweetTokenizer(preserve_case=self.preserve_case, reduce_len=self.reduce_len, strip_handles=self.strip_handles)
-        
-        return map(tweetTokenizer.tokenize, tweets)
+        tweetTokenizer = TweetTokenizer(preserve_case=self.preserve_case, reduce_len=self.reduce_len,
+                                        strip_handles=self.strip_handles)
+
+        return list(map(tweetTokenizer.tokenize, tweets))

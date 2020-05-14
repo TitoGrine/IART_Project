@@ -2,9 +2,10 @@ import nltk
 from nltk.stem.wordnet import WordNetLemmatizer
 from sklearn.base import BaseEstimator, TransformerMixin
 
-class Tokenizer(BaseEstimator, TransformerMixin):
 
-    def __init__(self, algorithm):
+class Lemmatization(BaseEstimator, TransformerMixin):
+
+    def __init__(self):
         nltk.download('wordnet')
         self.lemmatizer = WordNetLemmatizer()
 
@@ -14,6 +15,5 @@ class Tokenizer(BaseEstimator, TransformerMixin):
     def inverse_transform(self, X):
         return [" ".join(doc) for doc in X]
 
-    def transform(self, tweet):
-        return list(map(self.lemmatizer.lemmatize, tweet))
-
+    def transform(self, tweets):
+        return list(map(lambda x: map(self.lemmatizer.lemmatize, x), tweets))

@@ -3,7 +3,8 @@ from nltk.stem.porter import PorterStemmer
 from nltk.stem.snowball import EnglishStemmer
 from sklearn.base import BaseEstimator, TransformerMixin
 
-class Tokenizer(BaseEstimator, TransformerMixin):
+
+class Stemming(BaseEstimator, TransformerMixin):
 
     def __init__(self, algorithm):
 
@@ -21,4 +22,4 @@ class Tokenizer(BaseEstimator, TransformerMixin):
         return [" ".join(doc) for doc in X]
 
     def transform(self, tweet):
-        return list(map(self.stemmer.stem, tweet))
+        return list(map(lambda x: map(self.stemmer.stem, x), tweet))

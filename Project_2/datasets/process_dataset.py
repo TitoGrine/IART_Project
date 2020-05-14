@@ -2,6 +2,13 @@ import re
 from tweet import Tweet
 
 
+def process_valence(valence):
+    if valence <= 0:
+        return 0
+    elif valence > 0:
+        return 1
+
+
 def process_dataset(url):
     file = open(url, 'r')
     dataset = file.read()
@@ -10,7 +17,8 @@ def process_dataset(url):
     prepared_data.pop(0)
     prepared_data.pop()
 
-    return list(map(lambda x: Tweet(x[0], x[1], x[2], int(x[3].split(":")[0]), x[3].split(":")[1]), prepared_data))
+    return list(map(lambda x: Tweet(x[0], x[1], x[2], int(x[3].split(":")[0]), x[3].split(":")[1]),
+                    prepared_data))
 
 
 def get_dataset(data):
