@@ -1,0 +1,26 @@
+class sklearn.svm.SVC(*, C=1.0, kernel='rbf', degree=3, gamma='scale',
+ coef0=0.0, shrinking=True, probability=False, tol=0.001, cache_size=200,
+  class_weight=None, verbose=False, max_iter=-1,
+   decision_function_shape='ovr', break_ties=False, random_state=None)
+
+basic_pipeline: hovers around .5
+                C -> up for better?
+                kernel -> linear hovers .52, sigmoid is kinda wild, precomputed not supported, 
+                degree -> only for poly kernel, worthless
+                gamma -> weird? can be a float?
+                coef0 -> only for poly and sigmoid, improves with higher values
+                shrinking -> keep it on ffs
+                probability -> ??? worsens?
+                tol -> didn't change much
+                cache_size -> probably better to up it
+                max_iter -> why would i limit, huh
+                decision_function_shape -> ovo might be marginally better (turns out it's not)
+                break_ties -> idk man (True makes it marginally worse?)
+
+stemming_pipeline: meh
+
+stopwords_pipeline: better?
+
+emojis_pipeline: meh
+
+everything_pipeline: seems better
