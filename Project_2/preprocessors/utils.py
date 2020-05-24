@@ -22,3 +22,4 @@ def fit(x, y, clsf, oversample=False):
     clsf.fit(x_over, y_over)
     y_pred = clsf.predict(x_test)
     print(classification_report(y_test, y_pred, zero_division=0))
+    return y_test, y_pred
