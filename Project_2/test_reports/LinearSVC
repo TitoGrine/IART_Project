@@ -1,0 +1,23 @@
+class sklearn.svm.LinearSVC(penalty='l2', loss='squared_hinge',
+ *, dual=True, tol=0.0001, C=1.0, multi_class='ovr',
+  fit_intercept=True, intercept_scaling=1, class_weight=None,
+   verbose=0, random_state=None, max_iter=1000)
+
+basic_pipeline: hovers around .55
+                loss -> squared_hinge marginally better
+                dual -> false marginally better (i was wrong)
+                tol -> increasing seems to tighten result window
+                C -> inconclusive
+                multi_class -> crammer_singer is slower, doesn't do much
+                fit_intercept -> inconclusive (keep on)
+                intercept_scaling -> inconclusive (test further, increasing seems bad)
+                class_weight -> idek anymore
+                max_iter -> RELEVANT FINALLY
+
+stemming_pipeline: not much of a diff
+
+emojis_pipeline: again
+
+stopwords_pipeline: just straight up chaos
+
+everything_pipeline: it's..... worse? why is it worse? WHY

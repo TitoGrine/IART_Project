@@ -1,0 +1,12 @@
+classifiers.cnn.CNN((dropout_rate=0.2, filters=250,
+                 kernel_size=3, units=250, activation_conv='relu',
+                 activation_end='sigmoid',
+                  loss_function='sparse_categorical_crossentropy',
+                   epochs=3))
+
+dropout_rate -> seems to have a sweet spot around .42 - .44
+filters -> more than 500 seems to make it worse
+kernel_size -> i refuse to keep increasing it
+units -> similar situation to filters
+(skippin bois)
+epochs -> more epochs gets better results with diminishing returns (unsurprisingly)

@@ -12,4 +12,4 @@ def emojis_pipeline(x, y, clsf):
                           TfidfVectorizer(lowercase=False, tokenizer=lambda _: _))
     vectorized_x = model.fit_transform(x, y)
     fit(vectorized_x, y, clsf, oversample=True)
-    return model
+    
