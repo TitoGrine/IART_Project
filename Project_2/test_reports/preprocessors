@@ -1,0 +1,17 @@
+d_stopwords.py:
+    freq_limit -> default at 1, 0 lowers acc a bit, 2 makes better, downhill from 3 onwards
+
+emojis.py:
+    use_aliases -> True worsens
+
+expand.py: found nothing to mess up
+
+lemmatization.py: nothing to fuck up again :(
+
+miscellaneous.py: oh god oh fuck
+    single_letters -> True seems better
+    numbers -> True is better, small difference
+    punctuation -> True is deffo better
+    urls -> True is better
+    hashtag -> take a wild honking guess
+    lower_case -> small diff, true bet
