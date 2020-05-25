@@ -17,21 +17,24 @@ class CNN(BaseEstimator):
         self.kernel_size = kernel_size
         self.filters = filters
         self.dropout_rate = dropout_rate
+        self.model = Sequential()
 
-    def fit(self, x, y, x_test, y_test):
-        model = Sequential()
-        model.add(Embedding(x.size, 50))
-        model.add(Dropout(self.dropout_rate))
+    def fit(self, x, y):
+        self.model.add(Embedding(x.size, 50))
+        self.model.add(Dropout(self.dropout_rate))
 
-        model.add(Conv1D(self.filters, self.kernel_size, activation=self.activation_conv))
+        self.model.add(Conv1D(self.filters, self.kernel_size, activation=self.activation_conv))
 
-        model.add(GlobalMaxPooling1D())
+        self.model.add(GlobalMaxPooling1D())
 
-        model.add(Dense(self.units))
+        self.model.add(Dense(self.units))
 
-        model.add(Dense(3))
-        model.add(Activation(self.activation_end))
+        self.model.add(Dense(3))
+        self.model.add(Activation(self.activation_end))
 
-        model.compile(loss=self.loss_function, optimizer='adam', metrics=['accuracy'])
-        model.fit(x, y, batch_size=32, epochs=self.epochs, validation_data=(x_test, y_test))
-        return model
+        self.model.compile(loss=self.loss_function, optimizer='adam')
+        self.model.fit(x, y, batch_size=32, epochs=self.epochs)
+        return self.model
+
+    def predict(self, x_test):
+        return self.model.predict(x_test, batch_size=64, verbose=1)
