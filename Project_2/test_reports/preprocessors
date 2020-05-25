@@ -14,4 +14,12 @@ miscellaneous.py: oh god oh fuck
     punctuation -> True is deffo better
     urls -> True is better
     hashtag -> take a wild honking guess
-    lower_case -> small diff, true bet
+    lower_case -> small diff, true better
+
+sparse_to_dense.py: don't got shit
+
+misspelling.py:
+    max_edit_distance -> i have decided to not mess with it as it only gets worse
+    prefix_length -> ditto
+    transfer_casing -> didn't do much?
+    in conclusion, idfk
