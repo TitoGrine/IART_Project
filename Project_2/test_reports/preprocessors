@@ -23,3 +23,8 @@ misspelling.py:
     prefix_length -> ditto
     transfer_casing -> didn't do much?
     in conclusion, idfk
+
+stemming.py:
+    lancaster seems very slightly better than snowball (diff of maybe .01 or .02)
+    porter seems on par with lancaster
+    overall not much of a difference
