@@ -11,4 +11,4 @@ def stemming_pipeline(x, y, clsf):
     model = make_pipeline(Tokenizer(preserve_case=False, strip_handles=False), Stemming("snowball"),
                           TfidfVectorizer(lowercase=False, tokenizer=lambda _: _))
     vectorized_x = model.fit_transform(x, y)
-    fit(vectorized_x, y, clsf, oversample=True)
+    return fit(vectorized_x, y, clsf, oversample=True)

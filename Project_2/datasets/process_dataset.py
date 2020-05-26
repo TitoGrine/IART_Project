@@ -6,9 +6,9 @@ def process_valence_for_3(valence):
     if valence < 0:
         return 0
     elif valence > 0:
-        return 1
-    else:
         return 2
+    else:
+        return 1
 
 
 def process_valence_for_2(valence):

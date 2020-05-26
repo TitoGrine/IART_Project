@@ -15,7 +15,7 @@ class Misspelling(BaseEstimator, TransformerMixin):
 
     def process(self, token):
         suggestions = self.sym_spell.lookup(token, Verbosity.CLOSEST, max_edit_distance=2, include_unknown=True,
-                                            transfer_casing=True)
+                                            transfer_casing=True,)
         return suggestions[0].term
 
     def fit(self, X, y=None):

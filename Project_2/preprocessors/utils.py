@@ -1,6 +1,7 @@
 from imblearn.over_sampling import SMOTE
 from sklearn.metrics import classification_report
 from sklearn.model_selection import train_test_split
+import time
 
 
 def oversample_data(x, y):
@@ -19,7 +20,8 @@ def split(x, y, oversample=False):
 
 def fit(x, y, clsf, oversample=False):
     x_over, y_over, x_test, y_test = split(x, y, oversample=oversample)
+    start = time.time()
     clsf.fit(x_over, y_over)
     y_pred = clsf.predict(x_test)
     print(classification_report(y_test, y_pred, zero_division=0))
-    return y_test, y_pred
+    return y_test, y_pred, (time.time() - start)
