@@ -32,7 +32,7 @@ class Stopwords(Tokenizer):
 
         return token
 
-    def remove_stopwords(self, tweet, freq_limit=1):
+    def remove_stopwords(self, tweet, freq_limit=2):
         processed_tweet = list(map(lambda token: self.process(token, freq_limit), tweet))
         processed_tweet = list(filter(lambda token: (token != ""), processed_tweet))
 
