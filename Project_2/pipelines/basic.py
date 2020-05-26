@@ -9,4 +9,4 @@ from preprocessors.utils import fit
 def basic_pipeline(x, y, clsf):
     model = make_pipeline(Tokenizer(), TfidfVectorizer(lowercase=False, tokenizer=lambda _: _))
     vectorized_x = model.fit_transform(x, y)
-    return fit(vectorized_x, y, clsf, oversample=False)
+    return fit(vectorized_x, y, clsf, oversample=True)

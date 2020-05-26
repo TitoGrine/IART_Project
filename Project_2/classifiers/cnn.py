@@ -3,6 +3,7 @@ from keras.layers import Dense, Dropout, Activation
 from keras.layers import Embedding
 from keras.models import Sequential
 from sklearn.base import BaseEstimator
+import numpy as np
 
 
 class CNN(BaseEstimator):
@@ -37,4 +38,4 @@ class CNN(BaseEstimator):
         return self.model
 
     def predict(self, x_test):
-        return self.model.predict(x_test, batch_size=64, verbose=1)
+        return np.argmax(self.model.predict(x_test, batch_size=64, verbose=1), axis=1)
