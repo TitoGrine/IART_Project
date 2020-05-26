@@ -7,7 +7,7 @@ class Expand(BaseEstimator, TransformerMixin):
 
     def create_dictionary(self):
         contractions = {}
-        with open("preprocessors/contractions.txt") as file: 
+        with open("preprocessors/contractions.txt") as file:
             for line in file:
                 (key, val) = line.split(':')
                 contractions[key] = ' '.join(val.replace(":", "").split())
@@ -16,7 +16,7 @@ class Expand(BaseEstimator, TransformerMixin):
 
     def expand(self, token):
         if token in self.contractions:
-            token = self.emoticons[token]
+            token = self.contractions[token]
 
         return token
 

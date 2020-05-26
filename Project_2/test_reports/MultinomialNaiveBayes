@@ -1,0 +1,20 @@
+sklearn.naive_bayes.MultinomialNB(alpha=1.0, fit_prior=True, class_prior=None)
+
+basic_pipeline: incon-fuckin-clusive
+                hovers around .5, kinda under
+
+emojis_pipeline: slight improvement with fit_prior=False(?)
+                 hovers around .5
+
+stemming_pipeline: better than those two?
+                   hovers around .55?
+                   no smoothing improves a little(?)
+
+stopwords_pipeline: hovers around.5, kinda above?
+                    inconclusive all around
+
+everything_pipeline: somehow lame as shit, hardly goes past .5 ever
+                     higher alpha makes it *worse* (cut that)
+                     fit_prior=False makes it very slightly better(?) (it's noooot)
+
+conclusion: what the fuck i'm confused

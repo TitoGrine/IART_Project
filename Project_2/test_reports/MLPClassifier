@@ -1,0 +1,29 @@
+class sklearn.neural_network.MLPClassifier(hidden_layer_sizes=(100, ),
+ activation='relu', *, solver='adam', alpha=0.0001, batch_size='auto',
+  learning_rate='constant', learning_rate_init=0.001, power_t=0.5,
+   max_iter=200, shuffle=True, random_state=None, tol=0.0001,
+    verbose=False, warm_start=False, momentum=0.9,
+     nesterovs_momentum=True, early_stopping=False,
+      validation_fraction=0.1, beta_1=0.9, beta_2=0.999, epsilon=1e-08,
+       n_iter_no_change=10, max_fun=15000)
+
+Note: heavy as duck
+      rip my processor
+
+basic_pipeline: Not that great, considering how much heavier it is
+
+everything_pipeline: hidden_layer_sizes -> more neurons improve slightly (duh)
+                     activation -> relu seems best
+                     solver -> adam supposedly better for larger sets, sgd is trash, lbfgs recommended for smaller sets (ours)
+                     alpha -> still can't figure it out
+                     batch_size -> not used by lbfgs
+                     learning_rate, learning_rate_init and power_t -> only used by sgd
+                     max_iter -> you know the drill, more helps but don't exaggerate
+                     shuffle -> off better????? im shook
+                     tol -> smaller isn't necessarily better, neither is bigger
+                     warm_start -> interesting, to a certain degree but nah
+                     momentum -> another sgd only setting
+                     early_stopping -> only effective with sgd and adam, apparently
+                     betas, epsilon and n_iter_no_change -> adam stuff
+                     max_fun -> only for lbfgs, limiting factor, default doesn't seem to be reached
+
