@@ -5,7 +5,7 @@ The goal of the project was to build a one player puzzle game and create a progr
 using appropriate search algorithms, such as, Depth First Search, Breath First Search, Uniform Cost Search and A*, while
 testing different heuristics. The performance of each algorithm had to be measured in order to compare the results.  
 The choosen game was [Zhed](http://www.playzhed.com/).  
-For more information about the assignment check the [project's specification]() (Portuguese).
+For more information about the assignment check the [project's specification](https://github.com/TitoGrine/IART_Project/blob/master/Project_1/docs/Trabalho1_IA_2019_20.pdf) (Portuguese).
 
 ### Course Information
 
