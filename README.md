@@ -1,8 +1,8 @@
 ## IART Projects
 
 Projects from IART (Artificial Inteligence - 3rd year of Integrated Master Degree in Computer Engineering).  
-For information regarding the first project go [here]().  
-For information regarding the second project go [here]().
+For information regarding the first project go [here](https://github.com/TitoGrine/IART_Project/tree/master/Project_1).  
+For information regarding the second project go [here](https://github.com/TitoGrine/IART_Project/tree/master/Project_2).
 
 ### Course Information
 
