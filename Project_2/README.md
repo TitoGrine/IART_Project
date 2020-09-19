@@ -4,8 +4,8 @@ Second Project of IART (Artificial Inteligence - 3rd year of Integrated Master D
 The goal of this project was the categorization of tweets, from the SemEval2018 dataset, as positive, neutral or negative using Natural Language Processing techniques. The data had to be analysed and preprocessed beforehand and the results had to be measured using appropriate metrics.  
 Some of the used preprocessing techniques were tokenization, removal of stopwords, stemming, lemmatization, etc.  
 The supervized learning algorithms used were Naive Bayes, Support Vector Machines, Multi-Layered Perceptrons and Convolutional Neural Networks. These classifiers came from the [Scikit-Learn](https://scikit-learn.org/stable/) tool set.  
-For a more compreensive description of the project and its results check the [Jupiter Notebook]().   
-For more information about the assignment check the [project's specification]() (Portuguese).
+For a more compreensive description of the project and its results check the [Jupiter Notebook](https://github.com/TitoGrine/IART_Project/blob/master/Project_2/sentiment_analysis.ipynb).   
+For more information about the assignment check the [project's specification](https://github.com/TitoGrine/IART_Project/blob/master/Project_2/docs/Trabalho2_IA_2019_20.pdf) (Portuguese).
 
 ### Course Information
 
