@@ -21,7 +21,7 @@ For more information about the assignment check the [project's specification](ht
 
 ```python run.py {game, solver} [<board_number> <algorithm>]```
 
-**Options**:  
+Options:  
 - **game** - runs the interface made for the game  
 - **solver** - runs the solver for the given board_number, with the respective algorithm  
 - **board_number** - number between 1 and 100  
