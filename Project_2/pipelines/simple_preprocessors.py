@@ -1,10 +1,9 @@
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.pipeline import make_pipeline
 
-from classifiers.cnn import CNN
 from preprocessors.lemmatization import Lemmatization
 from preprocessors.tokenizer import Tokenizer
-from preprocessors.utils import fit, split
+from preprocessors.utils import fit
 
 
 def simple_pipeline(x, y, clsf):
